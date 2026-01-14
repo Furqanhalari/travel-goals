@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Goals - Home{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <style>
+      .loading-message, .no-data, .error-message {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        list-style: none;
+      }
+      
+      .error-message {
+        color: #d32f2f;
+      }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section id="hero_section">
+      <div id="hero_content">
+        <h1>Travel Goals</h1>
+        <p>Let's explore the world together</p>
+        <a href="{{ url_for('about') }}">Our Vendors</a>
+      </div>
+    </section>
+    <section id="highlights">
+      <h2>Highlights</h2>
+      <ul id="highlights-container">
+        <li class="loading-message">Loading highlights...</li>
+      </ul>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+      // Fetch highlights from API
+      async function loadHighlights() {
+        console.log('Loading highlights...');
+        const container = document.getElementById('highlights-container');
+        
+        try {
+          const response = await fetch('/api/highlights', {credentials: 'include'});
+          const data = await response.json();
+          console.log('Highlights API Response:', data);
+          
+          if (data.success && data.highlights && data.highlights.length > 0) {
+            container.innerHTML = '';
+            
+            data.highlights.forEach((destination) => {
+              const li = document.createElement('li');
+              li.className = 'highlight';
+              
+              const cityName = destination.city || destination.name;
+              const imageUrl = destination.image_url || '../static/images/places/default.jpg';
+              
+              li.innerHTML = `
+                <img src="${imageUrl}" alt="${destination.name}" />
+                <p>${cityName} <strong>${destination.country}</strong></p>
+              `;
+              
+              container.appendChild(li);
+            });
+            
+            console.log('Highlights loaded successfully');
+          } else {
+            container.innerHTML = '<li class="no-data">No highlights available</li>';
+          }
+        } catch (error) {
+          console.error('ERROR loading highlights:', error);
+          container.innerHTML = '<li class="error-message">Failed to load highlights</li>';
+        }
+      }
+      
+      document.addEventListener('DOMContentLoaded', loadHighlights);
+    </script>
+{% endblock %}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Travel Goals{% endblock %}</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&family=Oleo+Script:wght@700&family=Quicksand:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}" />
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="{{ url_for('index') }}" id="page_logo">Travel Goals</a>
+        <button id="mobileMenuBtn" class="hamburger-menu" aria-label="Toggle navigation">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+        <ul id="mainNav">
+          <li><a href="{{ url_for('index') }}" class="header_link">Home</a></li>
+          <li><a href="{{ url_for('about') }}" class="header_link">Vendors</a></li>
+          <li><a href="{{ url_for('places') }}" class="header_link">Destinations</a></li>
+          <li><a href="{{ url_for('packages') }}" class="header_link">Packages</a></li>
+          <li><a href="{{ url_for('contact') }}" class="header_link">Booking</a></li> 
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="modern-footer">
+      <div class="footer-cta">
+        <div class="cta-icon">✨</div>
+        <h2>Plan Your Dream Vacation</h2>
+        <p>Connect with our expert travel guides to start your next adventure.</p>
+        <a href="{{ url_for('contact') }}" class="btn-cta">Start Planning →</a>
+      </div>
+      
+      <div class="footer-container">
+        <div class="footer-col">
+          <h3>Contact</h3>
+          <ul class="contact-list">
+            <li><i class="fas fa-phone-alt"></i> +92 335 3072614</li>
+            <li><i class="fas fa-map-marker-alt"></i> Clifton Block 8<br>Karachi, Pakistan</li>
+            <li><i class="fas fa-envelope"></i> furqanhalari257@gmail.com</li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Navigate</h3>
+          <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('packages') }}">Packages</a></li>
+            <li><a href="{{ url_for('places') }}">Destinations</a></li>
+            <li><a href="{{ url_for('about') }}">Vendors</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Follow Us</h3>
+          <ul class="footer-social-list">
+            <li><a href="https://facebook.com" target="_blank">Facebook</a></li>
+            <li><a href="https://instagram.com" target="_blank">Instagram</a></li>
+            <li><a href="https://linkedin.com" target="_blank">LinkedIn</a></li>
+            <li><a href="https://twitter.com" target="_blank">Twitter</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+            <p>&copy; Copyright Travel Goals. All rights reserved. 2026</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- AI Chatbot Widget -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    
+    <div id="chat-widget" class="chat-widget hidden">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-header-avatar">✈️</div>
+                <div class="chat-header-text">
+                    <h3>Travel Assistant</h3>
+                    <span class="chat-header-status">
+                        <span class="status-dot"></span> Online
+                    </span>
+                </div>
+            </div>
+            <button id="chat-close" class="chat-close" aria-label="Close chat">×</button>
+        </div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ask me about travel..." autocomplete="off" aria-label="Chat message">
+            <button id="chat-send" aria-label="Send message">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <button id="chat-fab" class="chat-fab" aria-label="Open travel assistant">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+        </svg>
+    </button>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

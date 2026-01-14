@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Goals - Our Vendors{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}" />
+{% endblock %}
+
+{% block content %}
+    <section>
+      <h2>Our Trusted Vendors</h2>
+      <div id="vendors-container">
+        <div class="loading-message">Loading vendors...</div>
+      </div>
+      <a href="{{ url_for('places') }}">Discover Places</a>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+      // Fetch vendors from API
+      async function loadVendors() {
+        console.log('Loading vendors...');
+        const vendorsContainer = document.getElementById('vendors-container');
+        
+        try {
+          const response = await fetch('/api/vendors', {credentials: 'include'});
+          const data = await response.json();
+          console.log('Vendors response:', data);
+          
+          if (data.success && data.vendors && data.vendors.length > 0) {
+            vendorsContainer.innerHTML = '';
+
+            data.vendors.forEach((vendor) => {
+              const vendorDiv = document.createElement('div');
+              vendorDiv.className = 'service';
+
+              const stars = '⭐'.repeat(Math.round(vendor.rating || 0));
+              const verificationBadge = vendor.verification_status === 'verified' 
+                ? '<span style="color: #4CAF50; font-weight: bold;">✓ Verified</span>' 
+                : '<span style="color: #888;">Pending</span>';
+              
+              vendorDiv.innerHTML = `
+                <img src="${vendor.image_url || '{{ url_for("static", filename="images/places/default-vendor.jpg") }}'}" alt="${vendor.company_name}" />
+                <div class="service-info">
+                  <div class="service-title">${vendor.company_name}</div>
+                  <hr />
+                  <p class="service-description">
+                    <strong>License:</strong> ${vendor.business_license}<br/>
+                    <strong>Rating:</strong> ${stars} ${vendor.rating ? vendor.rating.toFixed(1) : 'N/A'}<br/>
+                    <strong>Status:</strong> ${verificationBadge}<br/>
+                    <strong>Commission Rate:</strong> ${vendor.commission_rate}%
+                  </p>
+                </div>
+              `;
+              
+              vendorsContainer.appendChild(vendorDiv);
+            });
+          } else {
+            vendorsContainer.innerHTML = '<div class="no-data">No vendors available at the moment.</div>';
+          }
+        } catch (error) {
+          console.error('Error loading vendors:', error);
+          vendorsContainer.innerHTML = '<div class="error-message">Failed to load vendors. Please try again later.</div>';
+        }
+      }
+      
+      // Load vendors when page loads
+      document.addEventListener('DOMContentLoaded', loadVendors);
+    </script>
+{% endblock %}

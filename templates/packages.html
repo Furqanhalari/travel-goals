@@ -1,0 +1,1493 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Goals - Packages{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/packages.css') }}" />
+    <style>
+    .vendor-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 30px;
+      margin: 40px auto;
+      max-width: 1000px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      color: white;
+    }
+    .vendor-form {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      margin-top: 20px;
+      color: #333;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1em;
+      box-sizing: border-box;
+      font-family: 'Quicksand', sans-serif;
+    }
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .pricing-section-header {
+      grid-column: 1 / -1;
+      color: #667eea;
+      font-weight: bold;
+      margin: 10px 0 5px 0;
+      font-size: 1.1em;
+    }
+    .vendor-form button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s;
+    }
+    .vendor-form button:hover {
+      transform: translateY(-2px);
+    }
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 12px 30px;
+      border: none;
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .tab-btn.active {
+      background: white;
+      color: #667eea;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .message {
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .package-item {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+    .package-info {
+      flex: 1;
+    }
+    .package-info h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+      font-size: 1.3em;
+    }
+    .package-actions {
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+    }
+    .btn-small {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+    .btn-edit {
+      background: #ffc107;
+      color: #333;
+    }
+    .btn-edit:hover {
+      background: #e0a800;
+    }
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+    .btn-delete:hover {
+      background: #c82333;
+    }
+    .btn-toggle {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-toggle:hover {
+      background: #5a6268;
+    }
+    .btn-toggle.active {
+      background: #28a745;
+    }
+    .status-active { background: #d4edda; color: #155724; }
+    .status-inactive { background: #f8d7da; color: #721c24; }
+
+    /* --- RESPONSIVE PACKAGES GRID --- */
+    #packages-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      align-items: start; /* PREVENT ROW STRETCHING */
+      gap: 30px;
+      padding: 0 20px 40px;
+      max-width: 1400px;
+      margin: 40px auto;
+    }
+    
+    #packages-container ul { display: contents; }
+    #packages-container li { list-style: none; display: flex; }
+
+    .package-card {
+      background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%); /* Attractive Light Sky/Lavender */
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 45px rgba(0, 122, 255, 0.1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(0, 122, 255, 0.08);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .package-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+    
+    .package-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    
+    .package-card:hover .package-img { transform: scale(1.05); }
+
+    .card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    
+    .location-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 140, 0, 0.1);
+      color: #e67e00;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      width: fit-content;
+      margin-bottom: 15px;
+    }
+
+    .package-name {
+      font-size: 1.6rem;
+      color: #1a2a6c;
+      margin-bottom: 12px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    
+    .package-desc {
+      color: #555;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .prices-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    
+    .price-box {
+      background: #fbfbff;
+      border: 1px solid #eff0f6;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    
+    .price-box h5 {
+      margin: 0 0 8px 0;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+    }
+    
+    .price-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    
+    .price-tag { font-weight: 700; color: #ff8c00; }
+
+    .card-footer {
+      display: flex;
+      gap: 12px;
+      margin-top: auto;
+    }
+    
+    .btn-main, .btn-sec {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    
+    .btn-main { background: #ff8c00; color: white; }
+    .btn-main:hover { background: #e67e00; box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3); }
+    
+    .btn-sec { background: #667eea; color: white; }
+    .btn-sec:hover { background: #5a6fd6; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); }
+
+    .reviews-container {
+      margin: 20px;
+      border-radius: 16px;
+      background: #fdfdfd;
+      border: 1px solid #eee;
+      animation: slideDown 0.4s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Smart Recommender Styles */
+    .recommender-section {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      padding: 80px 20px 60px; /* Increased top padding */
+      margin: 60px auto;
+      max-width: 1100px;
+      border-radius: 20px;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.3);
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      z-index: 1; /* Establish stacking context */
+    }
+    .recommender-section h1, 
+    .recommender-section p {
+      position: relative;
+      z-index: 2; /* Ensure text is above background animation */
+      margin-top: 0;
+    }
+    .recommender-section h1 {
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .recommender-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+      z-index: -1; /* Push animation behind content */
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .quiz-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      display: inline-block;
+      width: 100%;
+      max-width: 800px;
+      text-align: left;
+    }
+    .quiz-step {
+      display: none;
+    }
+    .quiz-step.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    .interest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .interest-item {
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .interest-item:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .interest-item.selected {
+      background: #ff8c00;
+      border-color: white;
+      transform: scale(1.05);
+    }
+    .quiz-btn {
+      background: #ff8c00;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s;
+    }
+    .quiz-btn:hover {
+      background: #e67e00;
+      transform: translateY(-2px);
+    }
+    .quiz-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .recommendation-results {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    .rec-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      color: #333;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .rec-card:hover {
+      transform: translateY(-10px);
+    }
+    .match-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #28a745;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      z-index: 2;
+    }
+    .reasoning-bubble {
+      background: #fff3e6;
+      border-left: 4px solid #ff8c00;
+      padding: 15px;
+      margin: 15px;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+    .loading-overlay {
+      display: none;
+      margin: 20px 0;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Review System Styles */
+    .reviews-container {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f8f9ff;
+      border-radius: 12px;
+      border: 1px solid #e0e4f0;
+      display: none; /* Initially hidden */
+    }
+    .reviews-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+    .reviews-btn:hover {
+      background: #764ba2;
+      transform: scale(1.05);
+    }
+    
+    .review-summary-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .summary-badge {
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.2);
+    }
+    .summary-badge.positive { background: #28a745; }
+    .summary-badge.mixed { background: #ffc107; color: #333; }
+    .summary-badge.negative { background: #dc3545; }
+    
+    .summary-text { font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px; }
+    
+    .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .pros-list, .cons-list { font-size: 0.85rem; }
+    .pros-list h5, .cons-list h5 { font-size: 0.9rem; margin-bottom: 5px; opacity: 0.9; }
+    .pros-list ul, .cons-list ul { padding-left: 20px; margin: 0; }
+    
+    .review-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid #eee;
+    }
+    .review-user { font-weight: bold; font-size: 0.9rem; color: #333; margin-bottom: 5px; }
+    .review-rating { color: #ffc107; font-size: 0.8rem; margin-bottom: 8px; }
+    .review-comment { font-size: 0.9rem; color: #666; line-height: 1.4; }
+    
+    .review-form {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 2px solid #eee;
+    }
+    .review-form h4 { margin-bottom: 15px; color: #333; font-size: 1.1rem; }
+    
+    .star-rating-input {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+    .star-rating-input input { display: none; }
+    .star-rating-input label { 
+      font-size: 32px; 
+      color: #e0e0e0; /* Gray light by default */
+      cursor: pointer; 
+      transition: color 0.2s, transform 0.2s; 
+    }
+    .star-rating-input label:hover { transform: scale(1.2); }
+    .star-rating-input input:checked ~ label,
+    .star-rating-input label:hover,
+    .star-rating-input label:hover ~ label { color: #ffcc00 !important; }
+  </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Vendor Package Management -->
+    <div id="vendorSection" class="vendor-section" style="display: none;">
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('add')">Add Package</button>
+        <button class="tab-btn" onclick="switchTab('manage')">My Packages</button>
+        <button class="tab-btn" onclick="switchTab('pending')">Pending Submissions</button>
+      </div>
+      
+      <!-- Add Package Tab -->
+      <div id="addTab" class="tab-content active">
+        <h2 style="text-align: center; margin-top: 0;">➕ Add New Package</h2>
+        <div class="vendor-form">
+          <form id="packageForm">
+            <input type="hidden" id="edit_package_id" value="">
+            
+            <div class="form-group">
+              <label for="pkg_destination">Destination *</label>
+              <select id="pkg_destination" name="pkg_destination" required>
+                <option value="">Select Destination</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="pkg_name">Package Name *</label>
+              <input type="text" id="pkg_name" required placeholder="e.g., Hunza Adventure Tour" />
+            </div>
+            
+            <div class="form-group">
+              <label for="pkg_description">Description *</label>
+              <textarea id="pkg_description" required 
+                        placeholder="Describe what's included in the package..."></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pkg_duration">Duration (days) *</label>
+                <input type="number" id="pkg_duration" required min="1" placeholder="7" />
+              </div>
+              
+              <div class="form-group">
+                <label for="pkg_max_travelers">Max Travelers *</label>
+                <input type="number" id="pkg_max_travelers" required min="1" placeholder="20" />
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="pkg_includes">What's Included *</label>
+              <textarea id="pkg_includes" required 
+                        placeholder="Hotel, meals, transportation, guide..."></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="pkg_image_url">Image URL</label>
+              <input type="url" id="pkg_image_url" placeholder="https://example.com/package.jpg" />
+            </div>
+            
+            <div class="pricing-section-header">💰 Economy Class Pricing</div>
+            <div class="pricing-grid">
+              <div class="form-group">
+                <label for="economy_adult">Adult Price *</label>
+                <input type="number" id="economy_adult" required min="0" step="0.01" placeholder="500.00" />
+              </div>
+              <div class="form-group">
+                <label for="economy_child">Child Price *</label>
+                <input type="number" id="economy_child" required min="0" step="0.01" placeholder="250.00" />
+              </div>
+              <div class="form-group">
+                <label for="economy_infant">Infant Price *</label>
+                <input type="number" id="economy_infant" required min="0" step="0.01" placeholder="100.00" />
+              </div>
+            </div>
+            
+            <div class="pricing-section-header">✈️ Business Class Pricing</div>
+            <div class="pricing-grid">
+              <div class="form-group">
+                <label for="business_adult">Adult Price *</label>
+                <input type="number" id="business_adult" required min="0" step="0.01" placeholder="800.00" />
+              </div>
+              <div class="form-group">
+                <label for="business_child">Child Price *</label>
+                <input type="number" id="business_child" required min="0" step="0.01" placeholder="400.00" />
+              </div>
+              <div class="form-group">
+                <label for="business_infant">Infant Price *</label>
+                <input type="number" id="business_infant" required min="0" step="0.01" placeholder="150.00" />
+              </div>
+            </div>
+            
+            <div id="pkgMessage"></div>
+            
+            <button type="submit" id="submitBtn">Submit for Approval</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Manage Packages Tab -->
+      <div id="manageTab" class="tab-content">
+        <div class="vendor-form">
+          <h3 style="color: #667eea; margin-top: 0;">✏️ My Active Packages</h3>
+          <p style="color: #666; margin-bottom: 20px;">Edit or manage your approved packages</p>
+          <div id="manageList">
+            <p style="text-align: center; color: #999;">Loading...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div id="pendingTab" class="tab-content">
+        <div class="vendor-form">
+          <h3 style="color: #667eea; margin-top: 0;">⏳ Pending Submissions</h3>
+          <p style="color: #666; margin-bottom: 20px;">Packages waiting for admin approval</p>
+          <div id="pendingList">
+            <p style="text-align: center; color: #999;">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Recommender Section -->
+    <div class="recommender-section" id="recommenderSection">
+      <h1>✨ AI Smart Recommender</h1>
+      <p style="font-size: 1.2rem; opacity: 0.95;">Tell us your preferences and let our AI find the perfect package for you!</p>
+      
+      <div class="quiz-container" id="quizContainer">
+        <!-- Step 1: Budget -->
+        <div class="quiz-step active" id="step1">
+          <h3>💰 What's your budget range? (USD per person)</h3>
+          <p style="margin-bottom: 20px; opacity: 0.8;">Help us narrow down the best options for your wallet.</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label style="color: white;">Min Budget</label>
+              <input type="number" id="quiz_min_budget" value="0" min="0" step="100">
+            </div>
+            <div class="form-group">
+              <label style="color: white;">Max Budget</label>
+              <input type="number" id="quiz_max_budget" value="2000" min="0" step="100">
+            </div>
+          </div>
+          <button class="quiz-btn" onclick="nextStep(2)">Next Step ➔</button>
+        </div>
+
+        <!-- Step 2: Interests -->
+        <div class="quiz-step" id="step2">
+          <h3>🏝️ What are you interested in?</h3>
+          <p style="margin-bottom: 15px; opacity: 0.8;">Select all that apply to your dream trip.</p>
+          <div class="interest-grid" id="interestGrid">
+            <div class="interest-item" data-interest="Beach">🏖️ Beach</div>
+            <div class="interest-item" data-interest="Adventure">🧗 Adventure</div>
+            <div class="interest-item" data-interest="Culture">🏛️ Culture</div>
+            <div class="interest-item" data-interest="Luxury">💎 Luxury</div>
+            <div class="interest-item" data-interest="Nature">🌲 Nature</div>
+            <div class="interest-item" data-interest="Budget">💰 Budget</div>
+            <div class="interest-item" data-interest="Family">👨‍👩‍👧 Family</div>
+            <div class="interest-item" data-interest="City">🏙️ City Tour</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="quiz-btn" style="background: rgba(255,255,255,0.2);" onclick="nextStep(1)">⬅ Back</button>
+            <button class="quiz-btn" id="step2Next" onclick="nextStep(3)">Next Step ➔</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Logistics -->
+        <div class="quiz-step" id="step3">
+          <h3>📅 Travel Details</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label style="color: white;">Travel Month</label>
+              <select id="quiz_month">
+                <option value="Any">Any Month</option>
+                <option value="January">January</option>
+                <option value="June">June</option>
+                <option value="December">December</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="color: white;">Duration (Days)</label>
+              <input type="number" id="quiz_duration" value="7" min="1">
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="quiz-btn" style="background: rgba(255,255,255,0.2);" onclick="nextStep(2)">⬅ Back</button>
+            <button class="quiz-btn" onclick="getRecommendations()">✨ Find My Matches!</button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-overlay" id="quizLoading">
+          <div class="spinner"></div>
+          <p>Analyzing matching packages for you...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="recommendationResults" style="display: none;">
+          <h2 style="margin-bottom: 25px;">🎯 Top Matches for You</h2>
+          <div class="recommendation-results" id="resultsGrid"></div>
+          <button class="quiz-btn" style="background: rgba(255,255,255,0.2);" onclick="resetQuiz()">🔄 Start Over</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="latest-products">
+      <h2 id="destination-title" style="text-align: center; color: #ff8c00; margin-bottom: 30px; font-size: 2.5rem;"></h2>
+      <div id="packages-container">
+        <p class="loading-message">Loading packages...</p>
+      </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    let isEditMode = false;
+    let packagesCache = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      checkVendorAccess();
+      loadDestinationsForDropdown();
+      loadPackages();
+      initRecommender();
+    });
+
+    // --- Smart Recommender Logic ---
+    let selectedInterests = new Set();
+    
+    function initRecommender() {
+      // Interest selection toggle
+      document.querySelectorAll('.interest-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const interest = item.dataset.interest;
+          if (selectedInterests.has(interest)) {
+            selectedInterests.delete(interest);
+            item.classList.remove('selected');
+          } else {
+            selectedInterests.add(interest);
+            item.classList.add('selected');
+          }
+        });
+      });
+    }
+
+    function nextStep(step) {
+      document.querySelectorAll('.quiz-step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+    }
+
+    function resetQuiz() {
+      selectedInterests.clear();
+      document.querySelectorAll('.interest-item').forEach(item => item.classList.remove('selected'));
+      document.getElementById('recommendationResults').style.display = 'none';
+      document.getElementById('step1').style.display = 'block'; // Ensure form is visible
+      nextStep(1);
+    }
+
+    async function getRecommendations() {
+      const minBudget = document.getElementById('quiz_min_budget').value;
+      const maxBudget = document.getElementById('quiz_max_budget').value;
+      const month = document.getElementById('quiz_month').value;
+      const duration = document.getElementById('quiz_duration').value;
+      
+      const payload = {
+        min_budget: parseInt(minBudget),
+        max_budget: parseInt(maxBudget),
+        interests: Array.from(selectedInterests),
+        month: month,
+        duration: parseInt(duration),
+        travelers: 1
+      };
+
+      // UI Transitions
+      document.getElementById('step3').classList.remove('active');
+      document.getElementById('quizLoading').style.display = 'block';
+
+      try {
+        const response = await fetch('/api/ai/recommend-packages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.recommendations) {
+          renderRecommendations(data.recommendations);
+        } else {
+          alert('Failed to get recommendations: ' + (data.message || 'Unknown error'));
+          nextStep(3);
+        }
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        alert('An error occurred. Please try again.');
+        nextStep(3);
+      } finally {
+        document.getElementById('quizLoading').style.display = 'none';
+      }
+    }
+
+    function renderRecommendations(recs) {
+      const resultsGrid = document.getElementById('resultsGrid');
+      resultsGrid.innerHTML = '';
+      
+      // We need to fetch full package details to show images correctly 
+      // or we can use the data if we had it. For now, let's use the catalog we loaded earlier.
+      // But a better way is to rely on what the backend provides if possible.
+      // Since recommendations only have ID and reasoning, let's fetch the full list if not already available.
+      
+      if (!packagesCache || packagesCache.length === 0) {
+        // Fallback: fetch active packages
+        fetch('/api/packages').then(res => res.json()).then(data => {
+            if (data.success) {
+                const allPkgs = data.packages;
+                displayMatchCards(recs, allPkgs);
+            }
+        });
+      } else {
+        displayMatchCards(recs, packagesCache);
+      }
+      
+      document.getElementById('recommendationResults').style.display = 'block';
+    }
+
+    function displayMatchCards(recs, allPkgs) {
+      const resultsGrid = document.getElementById('resultsGrid');
+      resultsGrid.innerHTML = '';
+
+      recs.forEach(rec => {
+        const pkg = allPkgs.find(p => (p.package_id || p.id) == rec.package_id);
+        if (pkg) {
+          const card = document.createElement('div');
+          card.className = 'rec-card';
+          card.innerHTML = `
+            <div class="match-badge">${rec.match_score}% Match</div>
+            <img src="${pkg.image_url || '/static/images/places/default.jpg'}" style="width:100%; height:200px; object-fit:cover;">
+            <div style="padding: 15px;">
+              <h3 style="margin: 0 0 5px 0;">${pkg.package_name || pkg.name}</h3>
+              <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">📍 ${pkg.destination_name}, ${pkg.country}</p>
+              <div class="reasoning-bubble">
+                "${rec.reasoning}"
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                <span style="font-size: 1.2rem; font-weight: bold; color: #ff8c00;">$${pkg.economy_adult_price}</span>
+                <a href="/contact?package_id=${pkg.package_id || pkg.id}" class="btn-small" style="background:#ff8c00; color:white; text-decoration:none; padding: 8px 15px; border-radius: 5px;">Book Now</a>
+              </div>
+            </div>
+          `;
+          resultsGrid.appendChild(card);
+        }
+      });
+      
+      if (resultsGrid.children.length === 0) {
+          resultsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No exact matches found, but check our latest packages below!</p>';
+      }
+      
+      resultsGrid.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      if (tab === 'add') {
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+        document.getElementById('addTab').classList.add('active');
+        // Only reset form if NOT in edit mode
+        if (!isEditMode) {
+          resetForm();
+        }
+      } else if (tab === 'manage') {
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+        document.getElementById('manageTab').classList.add('active');
+        loadMyPackages();
+      } else {
+        document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+        document.getElementById('pendingTab').classList.add('active');
+        loadPendingPackages();
+      }
+    }
+
+    async function checkVendorAccess() {
+      try {
+        const response = await fetch('/api/session', { credentials: 'include' });
+        const data = await response.json();
+        
+        if (data.success && data.user.role === 'vendor') {
+          document.getElementById('vendorSection').style.display = 'block';
+        }
+      } catch (error) {
+        console.log('Not a vendor');
+      }
+    }
+
+    async function loadDestinationsForDropdown() {
+      try {
+        const response = await fetch('/api/destinations');
+        const data = await response.json();
+        
+        if (data.success && data.destinations) {
+          const select = document.getElementById('pkg_destination');
+          data.destinations.forEach(dest => {
+            const option = document.createElement('option');
+            option.value = dest.destination_id;
+            option.textContent = `${dest.name}, ${dest.country}`;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading destinations:', error);
+      }
+    }
+
+    async function loadMyPackages() {
+      const listDiv = document.getElementById('manageList');
+      listDiv.innerHTML = '<p style="text-align: center; color: #999;">Loading...</p>';
+      
+      try {
+        const response = await fetch('/api/vendor/my-packages', { credentials: 'include' });
+        const data = await response.json();
+        
+        if (data.success && data.packages && data.packages.length > 0) {
+          // Store packages in cache
+          packagesCache = data.packages;
+          
+          listDiv.innerHTML = '';
+          data.packages.forEach(pkg => {
+            const statusClass = pkg.is_active == 1 ? 'status-active' : 'status-inactive';
+            const statusText = pkg.is_active == 1 ? 'Active' : 'Inactive';
+            
+            const div = document.createElement('div');
+            div.className = 'package-item';
+            div.innerHTML = `
+              <div class="package-info">
+                <h4>
+                  ${pkg.name}
+                  <span class="status-badge ${statusClass}">${statusText}</span>
+                </h4>
+                <p style="color: #666;"><strong>Destination:</strong> ${pkg.destination_name}, ${pkg.country}</p>
+                <p style="color: #666;"><strong>Duration:</strong> ${pkg.duration_days} days | <strong>Economy:</strong> $${pkg.economy_adult_price.toFixed(2)} | <strong>Business:</strong> $${pkg.business_adult_price.toFixed(2)}</p>
+                <p style="color: #666; font-size: 0.9em;">${pkg.description}</p>
+              </div>
+              <div class="package-actions">
+                <button class="btn-small btn-edit" onclick="editPackage(${pkg.package_id})">
+                  ✏️ Edit
+                </button>
+                <button class="btn-small btn-toggle ${pkg.is_active == 1 ? 'active' : ''}" onclick="togglePackage(${pkg.package_id})">
+                  ${pkg.is_active == 1 ? '🔒 Deactivate' : '🔓 Activate'}
+                </button>
+                <button class="btn-small btn-delete" onclick="deletePackage(${pkg.package_id})">
+                  🗑️ Delete
+                </button>
+              </div>
+            `;
+            listDiv.appendChild(div);
+          });
+        } else {
+          listDiv.innerHTML = '<p style="text-align: center; color: #999;">No packages yet. Create your first package!</p>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        listDiv.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading packages</p>';
+      }
+    }
+
+    async function editPackage(packageId) {
+      console.log('Edit clicked for package:', packageId);
+      console.log('Packages cache:', packagesCache);
+      
+      try {
+        // Find package in cache first
+        let pkg = packagesCache.find(p => p.package_id === packageId);
+        
+        // If not in cache, fetch it
+        if (!pkg) {
+          console.log('Package not in cache, fetching...');
+          const response = await fetch('/api/vendor/my-packages', { credentials: 'include' });
+          const data = await response.json();
+          
+          if (data.success) {
+            packagesCache = data.packages;
+            pkg = data.packages.find(p => p.package_id === packageId);
+          }
+        }
+        
+        if (pkg) {
+          console.log('Found package:', pkg);
+          
+          document.getElementById('edit_package_id').value = pkg.package_id;
+          document.getElementById('pkg_destination').value = pkg.destination_id;
+          document.getElementById('pkg_name').value = pkg.name;
+          document.getElementById('pkg_description').value = pkg.description;
+          document.getElementById('pkg_duration').value = pkg.duration_days;
+          document.getElementById('pkg_max_travelers').value = pkg.max_travelers;
+          document.getElementById('pkg_includes').value = pkg.includes;
+          document.getElementById('pkg_image_url').value = pkg.image_url || '';
+          document.getElementById('economy_adult').value = pkg.economy_adult_price;
+          document.getElementById('economy_child').value = pkg.economy_child_price;
+          document.getElementById('economy_infant').value = pkg.economy_infant_price;
+          document.getElementById('business_adult').value = pkg.business_adult_price;
+          document.getElementById('business_child').value = pkg.business_child_price;
+          document.getElementById('business_infant').value = pkg.business_infant_price;
+          
+          isEditMode = true;
+          document.getElementById('submitBtn').textContent = 'Update Package';
+          
+          switchTab('add');
+          
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          
+          console.log('Form populated successfully');
+        } else {
+          alert('Package not found');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load package details');
+      }
+    }
+
+    async function togglePackage(packageId) {
+      if (!confirm('Are you sure you want to change the status of this package?')) return;
+      
+      try {
+        const response = await fetch(`/api/vendor/toggle-package/${packageId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage(data.message, 'success');
+          loadMyPackages();
+        } else {
+          showMessage(data.message || 'Failed to update package', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error. Please try again.', 'error');
+      }
+    }
+
+    async function deletePackage(packageId) {
+      if (!confirm('Are you sure you want to delete this package? This action cannot be undone.')) return;
+      
+      try {
+        const response = await fetch(`/api/vendor/delete-package/${packageId}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage(data.message, 'success');
+          loadMyPackages();
+        } else {
+          showMessage(data.message || 'Failed to delete package', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error. Please try again.', 'error');
+      }
+    }
+
+    function resetForm() {
+      isEditMode = false;
+      document.getElementById('edit_package_id').value = '';
+      document.getElementById('packageForm').reset();
+      document.getElementById('submitBtn').textContent = 'Submit for Approval';
+    }
+
+    function showMessage(text, type = 'success') {
+      const messageDiv = document.getElementById('pkgMessage');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      setTimeout(() => {
+        messageDiv.textContent = '';
+        messageDiv.className = '';
+      }, 5000);
+    }
+
+    document.getElementById('packageForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const messageDiv = document.getElementById('pkgMessage');
+      messageDiv.textContent = '';
+      
+      const packageId = document.getElementById('edit_package_id').value;
+      
+      const formData = {
+        destination_id: document.getElementById('pkg_destination').value,
+        name: document.getElementById('pkg_name').value.trim(),
+        description: document.getElementById('pkg_description').value.trim(),
+        duration_days: parseInt(document.getElementById('pkg_duration').value),
+        max_travelers: parseInt(document.getElementById('pkg_max_travelers').value),
+        includes: document.getElementById('pkg_includes').value.trim(),
+        image_url: document.getElementById('pkg_image_url').value.trim(),
+        adult_price: parseFloat(document.getElementById('economy_adult').value),
+        child_price: parseFloat(document.getElementById('economy_child').value),
+        infant_price: parseFloat(document.getElementById('economy_infant').value),
+        economy_adult_price: parseFloat(document.getElementById('economy_adult').value),
+        economy_child_price: parseFloat(document.getElementById('economy_child').value),
+        economy_infant_price: parseFloat(document.getElementById('economy_infant').value),
+        business_adult_price: parseFloat(document.getElementById('business_adult').value),
+        business_child_price: parseFloat(document.getElementById('business_child').value),
+        business_infant_price: parseFloat(document.getElementById('business_infant').value)
+      };
+      
+      try {
+        let response;
+        if (isEditMode && packageId) {
+          response = await fetch(`/api/vendor/update-package/${packageId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(formData)
+          });
+        } else {
+          response = await fetch('/api/vendor/add-package', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(formData)
+          });
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage(data.message, 'success');
+          resetForm();
+          if (isEditMode) {
+            setTimeout(() => switchTab('manage'), 2000);
+          }
+        } else {
+          showMessage(data.message || 'Operation failed', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error. Please try again.', 'error');
+      }
+    });
+
+    async function loadPendingPackages() {
+      const listDiv = document.getElementById('pendingList');
+      listDiv.innerHTML = '<p style="text-align: center; color: #999;">Loading...</p>';
+      
+      try {
+        const response = await fetch('/api/vendor/my-packages', { credentials: 'include' });
+        const data = await response.json();
+        
+        if (data.success && data.packages) {
+          const pendingResponse = await fetch('/api/admin/pending-packages', { credentials: 'include' });
+          const pendingData = await pendingResponse.json();
+          
+          if (pendingData.success && pendingData.packages && pendingData.packages.length > 0) {
+            listDiv.innerHTML = '';
+            
+            const sessionResponse = await fetch('/api/session', { credentials: 'include' });
+            const sessionData = await sessionResponse.json();
+            const vendorId = sessionData.user.vendor_id;
+            
+            const myPendingPackages = pendingData.packages.filter(pkg => pkg.vendor_id === vendorId);
+            
+            if (myPendingPackages.length > 0) {
+              myPendingPackages.forEach(pkg => {
+                const div = document.createElement('div');
+                div.className = 'package-item';
+                div.innerHTML = `
+                  <div class="package-info">
+                    <h4>${pkg.name} <span class="status-badge" style="background: #fff3cd; color: #856404;">Pending</span></h4>
+                    <p style="color: #666;"><strong>Destination:</strong> ${pkg.destination_name}</p>
+                    <p style="color: #666;"><strong>Duration:</strong> ${pkg.duration_days} days | <strong>Price:</strong> ${pkg.adult_price.toFixed(2)}</p>
+                    <small style="color: #999;">Submitted: ${new Date(pkg.submitted_at).toLocaleDateString()}</small>
+                  </div>
+                `;
+                listDiv.appendChild(div);
+              });
+            } else {
+              listDiv.innerHTML = '<p style="text-align: center; color: #999;">No pending submissions</p>';
+            }
+          } else {
+            listDiv.innerHTML = '<p style="text-align: center; color: #999;">No pending submissions</p>';
+          }
+        } else {
+          listDiv.innerHTML = '<p style="text-align: center; color: #999;">No pending submissions</p>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        listDiv.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading submissions</p>';
+      }
+    }
+
+    async function loadPackages() {
+      const container = document.getElementById('packages-container');
+      const urlParams = new URLSearchParams(window.location.search);
+      const destinationId = urlParams.get('destination_id');
+      
+      try {
+        let apiUrl = '/api/packages';
+        if (destinationId) apiUrl += `?destination_id=${destinationId}`;
+        
+        const response = await fetch(apiUrl, { credentials: 'include' });
+        const data = await response.json();
+        
+        if (data.success && data.packages && data.packages.length > 0) {
+          container.innerHTML = '';
+          
+          if (destinationId) {
+            document.getElementById('destination-title').textContent = 
+              `Packages for ${data.packages[0].destination_name}`;
+          }
+          
+          data.packages.forEach((pkg) => {
+            const card = document.createElement('div');
+            card.className = 'package-card';
+            card.innerHTML = `
+              <img src="${pkg.image_url || '{{ url_for("static", filename="images/places/default.jpg") }}'}" class="package-img" alt="${pkg.destination_name}" />
+              <div class="card-body">
+                <div class="location-badge">📍 ${pkg.destination_name}</div>
+                <h3 class="package-name">${pkg.package_name || pkg.name}</h3>
+                <p class="package-desc">${pkg.description}</p>
+                
+                <div class="prices-grid">
+                  <div class="price-box">
+                    <h5>Economy</h5>
+                    <div class="price-item"><span class="price-label">Adult</span><span class="price-tag">$${pkg.economy_adult_price.toFixed(0)}</span></div>
+                    <div class="price-item"><span class="price-label">Child</span><span class="price-tag">$${pkg.economy_child_price.toFixed(0)}</span></div>
+                  </div>
+                  <div class="price-box">
+                    <h5>Business</h5>
+                    <div class="price-item"><span class="price-label">Adult</span><span class="price-tag">$${pkg.business_adult_price.toFixed(0)}</span></div>
+                    <div class="price-item"><span class="price-label">Child</span><span class="price-tag">$${pkg.business_child_price.toFixed(0)}</span></div>
+                  </div>
+                </div>
+
+                <div class="card-footer">
+                   <a href="{{ url_for('contact') }}?package_id=${pkg.package_id}" class="btn-main">Book Now</a>
+                   <button class="btn-sec" onclick="toggleReviews(${pkg.package_id}, this)">
+                     💬 Reviews
+                   </button>
+                </div>
+              </div>
+               
+              <!-- Reviews Container (Hidden by default) -->
+              <div id="reviews-container-${pkg.package_id}" class="reviews-container" style="display:none;">
+                 <div class="reviews-content-area" style="padding: 10px 24px 24px;">
+                    <div class="text-center py-4" style="text-align:center;">
+                        <p style="color:#666; font-style:italic;">Loading reviews...</p>
+                    </div>
+                 </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = '<p class="error-message">No packages available for this category.</p>';
+        }
+      } catch (error) {
+        console.error('ERROR loading packages:', error);
+        container.innerHTML = '<p class="error-message">Failed to load packages</p>';
+      }
+    }
+
+    // --- Review System Functions ---
+    async function toggleReviews(packageId, btn) {
+        const container = document.getElementById(`reviews-container-${packageId}`);
+        const isCurrentlyVisible = container.style.display === 'block';
+
+        if (isCurrentlyVisible) {
+            container.style.display = 'none';
+            btn.textContent = '💬 Reviews';
+        } else {
+            container.style.display = 'block';
+            btn.textContent = '✖ Close Reviews';
+            await loadReviews(packageId);
+        }
+    }
+
+    async function loadReviews(packageId) {
+        const contentArea = document.querySelector(`#reviews-container-${packageId} .reviews-content-area`);
+        
+        try {
+            const response = await fetch(`/api/packages/${packageId}/reviews`);
+            if (!response.ok) throw new Error('API request failed');
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                let aiSummary = null;
+                // If 3+ reviews, get AI summary
+                if (data.total >= 3) {
+                    try {
+                        const aiResponse = await fetch(`/api/ai/summarize-reviews/${packageId}`);
+                        if (aiResponse.ok) {
+                            const aiData = await aiResponse.json();
+                            if (aiData.success) aiSummary = aiData.summary;
+                        }
+                    } catch (aiErr) {
+                        console.warn('AI Summary failed, showing raw reviews:', aiErr);
+                    }
+                }
+                
+                renderReviewsSection(packageId, data.reviews, aiSummary);
+            } else {
+                contentArea.innerHTML = `<p class="text-danger text-center py-3">Error: ${data.message || 'Could not load reviews'}</p>`;
+            }
+        } catch (error) {
+            console.error('Load reviews failed:', error);
+            contentArea.innerHTML = '<p class="text-danger text-center py-3">Failed to load reviews. Please check your database connection.</p>';
+        }
+    }
+
+    function renderReviewsSection(packageId, reviews, aiSummary) {
+        const contentArea = document.querySelector(`#reviews-container-${packageId} .reviews-content-area`);
+        
+        let html = '';
+        
+        // 1. AI Summary Section (if available)
+        if (aiSummary) {
+            html += `
+                <div class="review-summary-card">
+                    <div class="summary-header">
+                        <h4 style="margin:0;">🤖 AI Summary</h4>
+                        <span class="summary-badge ${aiSummary.sentiment || 'mixed'}">${aiSummary.sentiment || 'Mixed'}</span>
+                    </div>
+                    <div class="summary-text">${aiSummary.summary || 'Analyzing feedback...'}</div>
+                    <div class="pros-cons">
+                        <div class="pros-list">
+                            <h5>✅ Pros</h5>
+                            <ul>${(aiSummary.pros || []).map(p => `<li>${p}</li>`).join('') || '<li>Reliable quality</li>'}</ul>
+                        </div>
+                        <div class="cons-list">
+                            <h5>❌ Cons</h5>
+                            <ul>${(aiSummary.cons || []).map(c => `<li>${c}</li>`).join('') || '<li>None noted</li>'}</ul>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px; font-size:0.8rem; opacity:0.8;">
+                        ⭐ ${aiSummary.avg_rating || 'N/A'}/5.0 based on ${aiSummary.total_reviews || reviews.length} reviews
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Individual Reviews
+        html += '<div class="reviews-list">';
+        if (reviews.length === 0) {
+            html += '<p class="text-muted text-center py-3">No reviews yet. Be the first!</p>';
+        } else {
+            reviews.forEach(r => {
+                const stars = '⭐'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                html += `
+                    <div class="review-card" style="padding: 12px 20px;">
+                        <div class="review-user" style="margin-bottom:2px;">${escapeHtml(r.display_name)}</div>
+                        <div class="review-rating" style="font-size:1rem;">${stars} <small style="font-weight:normal; color:#999; margin-left:10px;">${r.created_at_formatted}</small></div>
+                    </div>
+                `;
+            });
+        }
+        html += '</div>';
+
+        // 3. Simple Review Form
+        html += `
+            <div class="review-form">
+                <h4 style="margin-bottom:15px; color:#1a2a6c;">Quick Rating</h4>
+                <div class="star-rating-input">
+                    <input type="radio" name="rating-${packageId}" value="5" id="star5-${packageId}"><label for="star5-${packageId}">★</label>
+                    <input type="radio" name="rating-${packageId}" value="4" id="star4-${packageId}"><label for="star4-${packageId}">★</label>
+                    <input type="radio" name="rating-${packageId}" value="3" id="star3-${packageId}"><label for="star3-${packageId}">★</label>
+                    <input type="radio" name="rating-${packageId}" value="2" id="star2-${packageId}"><label for="star2-${packageId}">★</label>
+                    <input type="radio" name="rating-${packageId}" value="1" id="star1-${packageId}"><label for="star1-${packageId}">★</label>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="text" id="reviewer-name-${packageId}" class="form-control" placeholder="Optional: Your Name" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;">
+                </div>
+                <button class="btn-main" style="width:100%; border-radius:10px;" onclick="submitReview(${packageId})">Submit Rating</button>
+            </div>
+        `;
+
+        contentArea.innerHTML = html;
+        
+        // Auto-fill name if logged in (optional, handled server-side mostly, but UI fix)
+    }
+
+    async function submitReview(packageId) {
+        const name = document.getElementById(`reviewer-name-${packageId}`).value.trim();
+        const ratingInput = document.querySelector(`input[name="rating-${packageId}"]:checked`);
+        
+        if (!ratingInput) { alert('Please select a star rating!'); return; }
+        
+        try {
+            const response = await fetch(`/api/packages/${packageId}/reviews`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_name: name || 'Anonymous',
+                    rating: parseInt(ratingInput.value)
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                alert('Review submitted! It will appear shortly.');
+                loadReviews(packageId); // Reload
+            } else {
+                alert(data.message || 'Error submitting review.');
+            }
+        } catch (e) {
+            alert('Connection error. Please try again.');
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+  </script>
+{% endblock %}

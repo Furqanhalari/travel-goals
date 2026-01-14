@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Travel Goals</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&family=Oleo+Script:wght@700&family=Quicksand:wght@300;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../static/css/shared.css" />
+  <style>
+    body {
+      background: linear-gradient(to bottom, rgba(10, 10, 10, 0.7), rgba(20, 20, 20, 0.8)),
+        url("../static/images/places/ocean.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      padding-top: 0;
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      color: #fff;
+    }
+    
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    nav ul {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .header_link {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      font-family: 'Raleway', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.8;
+      position: relative;
+    }
+
+    .header_link:hover {
+      opacity: 1;
+      color: rgb(244, 251, 118);
+    }
+    
+    .header_link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: rgb(244, 251, 118);
+      transition: width 0.3s;
+    }
+    
+    .header_link:hover::after {
+      width: 100%;
+    }
+
+    #page_logo {
+      color: rgb(244, 251, 118);
+      text-decoration: none;
+      font-size: 28px;
+      font-family: 'Oleo Script', cursive;
+      letter-spacing: 1px;
+    }
+    
+    .admin-container {
+      max-width: 1200px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .dashboard-header {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 40px;
+      border-radius: 24px;
+      margin-bottom: 40px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .dashboard-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 3em;
+      font-family: 'Raleway', sans-serif;
+      background: linear-gradient(135deg, #fff, #f4fb76);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .dashboard-header p {
+      margin: 0;
+      opacity: 0.6;
+      font-size: 1.2em;
+      letter-spacing: 1px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #f4fb76, transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(244, 251, 118, 0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    
+    .stat-card:hover::before {
+      transform: translateX(100%);
+    }
+
+    .stat-number {
+      font-size: 3.5em;
+      font-weight: 700;
+      color: #f4fb76;
+      margin: 10px 0;
+      text-shadow: 0 0 20px rgba(244, 251, 118, 0.3);
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1em;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 24px;
+      padding: 35px;
+      margin-bottom: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .section h2 {
+      margin-top: 0;
+      color: #fff;
+      font-family: 'Raleway', sans-serif;
+      font-size: 2em;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .section h2::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .vendor-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .vendor-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: scale(1.01);
+    }
+
+    .vendor-info h3 {
+      margin: 0 0 12px 0;
+      color: #f4fb76;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vendor-info p {
+      margin: 8px 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vendor-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 0.95em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-approve {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-approve:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-reject {
+      background: linear-gradient(135deg, #dc3545, #f86d6d);
+      color: white;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-reject:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-logout {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 10px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: 'Raleway', sans-serif;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: #dc3545;
+      border-color: #dc3545;
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.2em;
+    }
+
+    .message {
+      padding: 16px 24px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      font-weight: 600;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .badge {
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.8em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .badge-pending {
+      background: rgba(255, 243, 205, 0.1);
+      color: #ffc107;
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+    
+    /* Footer Styling & Logo Fix */
+    footer {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 40px 0;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    footer ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+    
+    footer img {
+      width: 24px;
+      height: 24px;
+      filter: brightness(0) invert(1);
+      opacity: 0.5;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      object-fit: contain;
+    }
+    
+    footer a:hover img {
+      opacity: 1;
+      transform: translateY(-5px);
+      filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(244, 251, 118, 0.8));
+    }
+    
+    footer p {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.9em;
+      margin: 0;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #444;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/index" id="page_logo">Travel Goals</a>
+      <ul>
+        <li><a href="/index">Home</a></li>
+        <li><a href="/admin">Admin Dashboard</a></li>
+        <li><button class="btn-logout" onclick="handleLogout()">Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="admin-container">
+    <div class="dashboard-header">
+      <h1>🛡️ Admin Dashboard</h1>
+      <p>Manage vendors, destinations, and packages</p>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Pending Vendors</div>
+        <div class="stat-number" id="statPendingVendors">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Destinations</div>
+        <div class="stat-number" id="statPendingDestinations">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Packages</div>
+        <div class="stat-number" id="statPendingPackages">-</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>👥 Pending Vendor Approvals</h2>
+      <div id="vendorsList">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📍 Pending Destination Approvals</h2>
+      <div id="destinationsList">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📦 Pending Package Approvals</h2>
+      <div id="packagesList">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <ul>
+      <li>
+        <a href="https://www.instagram.com" target="_blank" class="footer_link">
+          <img src="../static/images/icons/insta.png" alt="instagram logo" />
+        </a>
+      </li>
+      <li>
+        <a href="https://www.facebook.com" target="_blank" class="footer_link">
+          <img src="../static/images/icons/facebook.png" alt="Facebook logo" />
+        </a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com" target="_blank" class="footer_link">
+          <img src="../static/images/icons/youtube.png" alt="YouTube logo" />
+        </a>
+      </li>
+    </ul>
+    <ul>
+      <p>Copyright &#169 2026</p>
+    </ul>
+  </footer>
+
+  <script>
+    function showMessage(text, type = 'success') {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      setTimeout(() => {
+        messageDiv.textContent = '';
+        messageDiv.className = '';
+      }, 5000);
+    }
+
+    async function loadPendingVendors() {
+      try {
+        const response = await fetch('/api/admin/pending-vendors', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        const vendorsList = document.getElementById('vendorsList');
+        
+        if (data.success && data.vendors && data.vendors.length > 0) {
+          document.getElementById('statPendingVendors').textContent = data.vendors.length;
+          vendorsList.innerHTML = '';
+          
+          data.vendors.forEach(vendor => {
+            const card = document.createElement('div');
+            card.className = 'vendor-card';
+            card.innerHTML = `
+              <div class="vendor-info">
+                <h3>${vendor.company_name} <span class="badge badge-pending">Pending</span></h3>
+                <p><strong>Owner:</strong> ${vendor.full_name} (${vendor.username})</p>
+                <p><strong>Email:</strong> ${vendor.email}</p>
+                <p><strong>Phone:</strong> ${vendor.phone}</p>
+                <p><strong>License:</strong> ${vendor.business_license}</p>
+                <p><strong>Submitted:</strong> ${new Date(vendor.created_at).toLocaleDateString()}</p>
+              </div>
+              <div class="vendor-actions">
+                <button class="btn btn-approve" onclick="approveVendor(${vendor.vendor_id})">
+                  ✓ Approve
+                </button>
+                <button class="btn btn-reject" onclick="rejectVendor(${vendor.vendor_id})">
+                  ✗ Reject
+                </button>
+              </div>
+            `;
+            vendorsList.appendChild(card);
+          });
+        } else {
+          document.getElementById('statPendingVendors').textContent = '0';
+          vendorsList.innerHTML = '<div class="empty-state">No pending vendor approvals</div>';
+        }
+      } catch (error) {
+        console.error('Error loading vendors:', error);
+        document.getElementById('vendorsList').innerHTML = 
+          '<div class="empty-state">Error loading vendors</div>';
+      }
+    }
+
+    async function loadPendingDestinations() {
+      try {
+        const response = await fetch('/api/admin/pending-destinations', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        const destinationsList = document.getElementById('destinationsList');
+        
+        if (data.success && data.destinations && data.destinations.length > 0) {
+          document.getElementById('statPendingDestinations').textContent = data.destinations.length;
+          destinationsList.innerHTML = '';
+          
+          data.destinations.forEach(dest => {
+            const card = document.createElement('div');
+            card.className = 'vendor-card';
+            card.innerHTML = `
+              <div class="vendor-info">
+                <h3>${dest.name} <span class="badge badge-pending">Pending</span></h3>
+                <p><strong>Country:</strong> ${dest.country}</p>
+                <p><strong>Vendor:</strong> ${dest.company_name}</p>
+                <p><strong>Description:</strong> ${dest.description.substring(0, 100)}...</p>
+                <p><strong>Submitted:</strong> ${new Date(dest.submitted_at).toLocaleDateString()}</p>
+              </div>
+              <div class="vendor-actions">
+                <button class="btn btn-approve" onclick="approveDestination(${dest.pending_id})">
+                  ✓ Approve
+                </button>
+                <button class="btn btn-reject" onclick="rejectDestination(${dest.pending_id})">
+                  ✗ Reject
+                </button>
+              </div>
+            `;
+            destinationsList.appendChild(card);
+          });
+        } else {
+          document.getElementById('statPendingDestinations').textContent = '0';
+          destinationsList.innerHTML = '<div class="empty-state">No pending destination approvals</div>';
+        }
+      } catch (error) {
+        console.error('Error loading destinations:', error);
+        document.getElementById('destinationsList').innerHTML = 
+          '<div class="empty-state">Error loading destinations</div>';
+      }
+    }
+
+    async function loadPendingPackages() {
+      try {
+        const response = await fetch('/api/admin/pending-packages', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        const packagesList = document.getElementById('packagesList');
+        
+        if (data.success && data.packages && data.packages.length > 0) {
+          document.getElementById('statPendingPackages').textContent = data.packages.length;
+          packagesList.innerHTML = '';
+          
+          data.packages.forEach(pkg => {
+            const card = document.createElement('div');
+            card.className = 'vendor-card';
+            card.innerHTML = `
+              <div class="vendor-info">
+                <h3>${pkg.name} <span class="badge badge-pending">Pending</span></h3>
+                <p><strong>Destination:</strong> ${pkg.destination_name}</p>
+                <p><strong>Vendor:</strong> ${pkg.company_name}</p>
+                <p><strong>Duration:</strong> ${pkg.duration_days} days</p>
+                <p><strong>Price:</strong> $${pkg.adult_price}</p>
+                <p><strong>Submitted:</strong> ${new Date(pkg.submitted_at).toLocaleDateString()}</p>
+              </div>
+              <div class="vendor-actions">
+                <button class="btn btn-approve" onclick="approvePackage(${pkg.pending_pkg_id})">
+                  ✓ Approve
+                </button>
+                <button class="btn btn-reject" onclick="rejectPackage(${pkg.pending_pkg_id})">
+                  ✗ Reject
+                </button>
+              </div>
+            `;
+            packagesList.appendChild(card);
+          });
+        } else {
+          document.getElementById('statPendingPackages').textContent = '0';
+          packagesList.innerHTML = '<div class="empty-state">No pending package approvals</div>';
+        }
+      } catch (error) {
+        console.error('Error loading packages:', error);
+        document.getElementById('packagesList').innerHTML = 
+          '<div class="empty-state">Error loading packages</div>';
+      }
+    }
+
+    async function approveVendor(vendorId) {
+      if (!confirm('Are you sure you want to approve this vendor?')) return;
+      
+      try {
+        const response = await fetch(`/api/admin/approve-vendor/${vendorId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Vendor approved successfully!', 'success');
+          loadPendingVendors();
+        } else {
+          showMessage(data.message || 'Failed to approve vendor', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error. Please try again.', 'error');
+      }
+    }
+
+    async function rejectVendor(vendorId) {
+      if (!confirm('Are you sure you want to reject this vendor? This will delete their account.')) return;
+      
+      try {
+        const response = await fetch(`/api/admin/reject-vendor/${vendorId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Vendor rejected and removed', 'success');
+          loadPendingVendors();
+        } else {
+          showMessage(data.message || 'Failed to reject vendor', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error. Please try again.', 'error');
+      }
+    }
+
+    async function approveDestination(pendingId) {
+      if (!confirm('Approve this destination?')) return;
+      
+      try {
+        const response = await fetch(`/api/admin/approve-destination/${pendingId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Destination approved!', 'success');
+          loadPendingDestinations();
+        } else {
+          showMessage(data.message || 'Failed to approve', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error', 'error');
+      }
+    }
+
+    async function rejectDestination(pendingId) {
+      if (!confirm('Reject this destination?')) return;
+      
+      try {
+        const response = await fetch(`/api/admin/reject-destination/${pendingId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Destination rejected', 'success');
+          loadPendingDestinations();
+        } else {
+          showMessage(data.message || 'Failed to reject', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error', 'error');
+      }
+    }
+
+    async function approvePackage(pendingPkgId) {
+      if (!confirm('Approve this package?')) return;
+      
+      try {
+        const response = await fetch(`/api/admin/approve-package/${pendingPkgId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Package approved!', 'success');
+          loadPendingPackages();
+        } else {
+          showMessage(data.message || 'Failed to approve', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error', 'error');
+      }
+    }
+
+    async function rejectPackage(pendingPkgId) {
+      if (!confirm('Reject this package?')) return;
+      
+      try {
+        const response = await fetch(`/api/admin/reject-package/${pendingPkgId}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Package rejected', 'success');
+          loadPendingPackages();
+        } else {
+          showMessage(data.message || 'Failed to reject', 'error');
+        }
+      } catch (error) {
+        showMessage('Network error', 'error');
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        const response = await fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        if (response.ok) {
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    // Load data on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPendingVendors();
+      loadPendingDestinations();
+      loadPendingPackages();
+    });
+  </script>
+</body>
+</html>

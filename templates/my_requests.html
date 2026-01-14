@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+
+{% block title %}My Requests - Travel Goals{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/packages.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/payment.css') }}" />
+    <style>
+      .payment-status-badge {
+          font-size: 0.75rem;
+          padding: 4px 10px;
+          border-radius: 4px;
+          margin-left: 10px;
+          font-weight: 600;
+          text-transform: uppercase;
+      }
+      .payment-paid { background: #d4edda; color: #155724; }
+      .payment-unpaid { background: #f8d7da; color: #721c24; }
+      
+      .receipt-modal .modal-content {
+          border-radius: 0;
+          border: none;
+      }
+      .receipt-header {
+          background: #f8f9fa;
+          border-bottom: 2px dashed #ddd;
+          padding: 30px;
+          text-align: center;
+      }
+      .receipt-body {
+          padding: 40px;
+          font-family: 'Courier New', Courier, monospace;
+      }
+      .receipt-line {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+      }
+      .receipt-total {
+          border-top: 2px solid #333;
+          padding-top: 15px;
+          margin-top: 15px;
+          font-weight: bold;
+          font-size: 1.2rem;
+      }
+      .receipt-footer {
+          text-align: center;
+          padding: 20px;
+          font-size: 0.8rem;
+          color: #888;
+          border-top: 2px dashed #ddd;
+      }
+      @media print {
+          .modal-footer, .close { display: none !important; }
+          .modal-dialog { max-width: 100% !important; margin: 0 !important; }
+      }
+    .requests-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    
+    .page-title {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 40px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 2.5rem;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+    }
+
+    .request-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column; /* Mobile first, but we will use media query for larger screens */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #eee;
+    }
+
+    .request-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    @media (min-width: 768px) {
+      .request-card {
+        flex-direction: row;
+      }
+    }
+
+    .card-image {
+      width: 100%;
+      height: 200px; /* Fixed height for image area */
+      object-fit: cover;
+    }
+
+    @media (min-width: 768px) {
+      .card-image {
+        width: 300px;
+        height: auto; 
+        min-height: 250px;
+      }
+    }
+
+    .card-content {
+      padding: 25px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .package-title {
+      font-family: 'Raleway', sans-serif;
+      font-size: 1.5rem;
+      color: #333;
+      margin: 0;
+    }
+
+    .vendor-name {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .status-confirmed, .status-approved {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-cancelled, .status-rejected {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .status-completed {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #b8daff;
+    }
+
+    .card-body {
+      flex: 1;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 10px;
+      align-items: center;
+      color: #555;
+    }
+
+    .detail-icon {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .price-tag {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ff8c00;
+    }
+
+    .rejection-box {
+      background-color: #fff5f5;
+      border-left: 4px solid #dc3545;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 4px;
+    }
+
+    .rejection-title {
+      color: #dc3545;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 0.95rem;
+    }
+
+    .rejection-reason {
+      color: #666;
+      font-style: italic;
+    }
+    
+    .success-box {
+        background-color: #f0fff4;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 4px;
+    }
+    
+    .success-message {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.2rem;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        color: #666;
+        height: auto; 
+    }
+    
+    .date-badge {
+        background: #f0f0f0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-right: 10px;
+    }
+
+    /* Sticky Footer Styles */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    main {
+      flex: 1;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+    <div class="requests-container">
+      <h1 class="page-title">My Travel Requests</h1>
+      
+      <div id="requestsList">
+        <div class="loading">Loading your requests...</div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check login status
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      loadMyRequests();
+    });
+
+    async function loadMyRequests() {
+      const container = document.getElementById('requestsList');
+      
+      try {
+        const response = await fetch('/api/customer/my-bookings', { credentials: 'include' });
+        const data = await response.json();
+        
+        if (data.success && data.bookings && data.bookings.length > 0) {
+          container.innerHTML = '';
+          
+          data.bookings.forEach(booking => {
+            const card = document.createElement('div');
+            card.className = 'request-card';
+            
+            const imageUrl = booking.image_url || '{{ url_for("static", filename="images/places/default.jpg") }}';
+            
+            // Determine status text/class
+            let statusClass = 'status-pending';
+            let statusText = 'Pending Approval';
+            let statusDetails = '';
+            
+            if (booking.status === 'confirmed') {
+                statusClass = 'status-confirmed';
+                statusText = 'Accepted';
+                statusDetails = `
+                    <div class="success-box">
+                        <div class="success-message">🎉 Your travel is confirmed!</div>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #155724;">
+                            Pack your bags for <strong>${booking.destination_name}</strong>! 
+                            Your departure is on <strong>${new Date(booking.travel_date).toLocaleDateString()}</strong>.
+                        </p>
+                    </div>
+                `;
+            } else if (booking.status === 'cancelled') {
+                statusClass = 'status-cancelled';
+                statusText = 'Rejected';
+                statusDetails = `
+                    <div class="rejection-box">
+                        <div class="rejection-title">Reason for Rejection:</div>
+                        <div class="rejection-reason">"${booking.rejection_reason || 'No specific reason provided. Please contact support.'}"</div>
+                    </div>
+                `;
+            } else if (booking.status === 'completed') {
+                statusClass = 'status-completed';
+                statusText = 'Completed';
+            }
+            
+            card.innerHTML = `
+              <img src="${imageUrl}" alt="${booking.package_name}" class="card-image" onerror="this.src='{{ url_for("static", filename="images/places/default.jpg") }}'">
+              <div class="card-content">
+                <div class="card-header">
+                    <div>
+                        <h3 class="package-title">${booking.package_name}</h3>
+                        <div class="vendor-name">by ${booking.vendor_name}</div>
+                    </div>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                
+                <div class="card-body">
+                    <div class="detail-row">
+                        <span class="detail-icon">📅</span>
+                        <span>
+                            <span class="date-badge">Dep: ${new Date(booking.travel_date).toLocaleDateString()}</span>
+                            ${booking.return_date ? `<span class="date-badge">Ret: ${new Date(booking.return_date).toLocaleDateString()}</span>` : ''}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-icon">📍</span>
+                        <span>${booking.destination_name}, ${booking.country}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-icon">💰</span>
+                        <span class="price-tag">$${booking.total_price.toFixed(2)}</span>
+                        <span class="payment-status-badge ${booking.payment_status === 'Paid' ? 'payment-paid' : 'payment-unpaid'}">
+                            ${booking.payment_status || 'Unpaid'}
+                        </span>
+                    </div>
+                    
+                    ${statusDetails}
+                </div>
+                
+                <div class="card-footer" style="padding: 15px 0 0 0; border-top: 1px solid #eee; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+                    ${booking.payment_status !== 'Paid' && booking.status !== 'cancelled' ? `
+                        <button class="btn-main" onclick="initiatePayment(${booking.booking_id}, ${booking.total_price}, '${booking.package_name}')" style="padding: 8px 20px; font-size: 0.9rem;">
+                            💳 Pay Now
+                        </button>
+                    ` : ''}
+                    ${booking.payment_status === 'Paid' ? `
+                        <button class="btn-sec" onclick="viewReceipt(${booking.booking_id})" style="padding: 8px 20px; font-size: 0.9rem; background: #28a745;">
+                            📄 View Receipt
+                        </button>
+                    ` : ''}
+                </div>
+                
+                <div style="margin-top: 15px; font-size: 0.8rem; color: #999; text-align: right;">
+                    Request ID: #${booking.booking_id} • Date: ${booking.created_at}
+                </div>
+              </div>
+            `;
+            
+            container.appendChild(card);
+          });
+        } else {
+            container.innerHTML = `
+                <div class="no-data">
+                    <img src="{{ url_for('static', filename='images/icons/location_icon.png') }}" style="width: 50px; opacity: 0.5; margin-bottom: 15px;">
+                    <h3>No requests found</h3>
+                    <p>You haven't made any travel requests yet.</p>
+                    <a href="{{ url_for('packages') }}" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border-radius: 5px; text-decoration: none; font-weight: bold;">Browse Packages</a>
+                </div>
+            `;
+        }
+      } catch (error) {
+        console.error('Error fetching requests:', error);
+        container.innerHTML = '<div class="loading" style="color: #dc3545;">Failed to load your requests. Please try again later.</div>';
+      }
+    }
+    async function initiatePayment(id, amount, name) {
+        const payment = new PaymentModal(id, amount, name);
+        payment.show();
+    }
+
+    async function viewReceipt(bookingId) {
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}/receipt`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const r = data.receipt;
+                const receiptHTML = `
+                    <div class="payment-modal-overlay" id="receiptModalOverlay">
+                        <div class="payment-modal-container" style="max-width: 550px;">
+                            <div class="payment-header">
+                                <h3><i class="fas fa-file-invoice" style="margin-right: 10px;"></i> Travel Receipt</h3>
+                                <button class="close-payment" onclick="document.getElementById('receiptModalOverlay').remove()">&times;</button>
+                            </div>
+                            <div class="payment-body">
+                                <div style="text-align: center; margin-bottom: 25px;">
+                                    <h2 style="margin: 0; color: #667eea;">TRAVEL GOALS</h2>
+                                    <p style="color: #6c757d; font-size: 0.9rem;">Official Booking Confirmation</p>
+                                    <span style="background: #28a745; color: white; padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; font-weight: 700;">PAID IN FULL</span>
+                                </div>
+                                <div style="font-family: monospace; line-height: 1.6;">
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 5px 0;">
+                                        <span>Date:</span> <span>${r.payment_date}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 5px 0;">
+                                        <span>Transaction ID:</span> <span style="font-size: 0.8rem;">${r.transaction_id}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 5px 0;">
+                                        <span>Booking ID:</span> <span>#${r.booking_id}</span>
+                                    </div>
+                                    <div style="margin: 15px 0; border-top: 2px solid #333; padding-top: 10px;">
+                                        <div style="display: flex; justify-content: space-between;"><strong>Package:</strong> <span>${r.package.name}</span></div>
+                                        <div style="display: flex; justify-content: space-between;"><strong>Destination:</strong> <span>${r.package.destination}</span></div>
+                                        <div style="display: flex; justify-content: space-between;"><strong>Travel Date:</strong> <span>${r.departure_date}</span></div>
+                                        <div style="display: flex; justify-content: space-between;"><strong>Travelers:</strong> <span>${r.travelers.adults + r.travelers.children + r.travelers.infants}</span></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; border-top: 2px solid #333; margin-top: 10px; padding-top: 10px;">
+                                        <span>TOTAL PAID:</span>
+                                        <span style="color: #28a745;">$${r.total_amount.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="payment-footer">
+                                <button class="btn-cancel" onclick="document.getElementById('receiptModalOverlay').remove()">Close</button>
+                                <button class="btn-pay" onclick="window.print()">Print Receipt</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const existing = document.getElementById('receiptModalOverlay');
+                if (existing) existing.remove();
+                
+                document.body.insertAdjacentHTML('beforeend', receiptHTML);
+                const overlay = document.getElementById('receiptModalOverlay');
+                overlay.offsetHeight;
+                overlay.classList.add('show');
+            } else {
+                alert('Could not load receipt: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching receipt:', error);
+            alert('An error occurred while loading the receipt.');
+        }
+    }
+  </script>
+{% endblock %}

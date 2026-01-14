@@ -1,0 +1,238 @@
+body {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+  margin: 0;
+  padding: 0;
+  font-family: 'Quicksand', sans-serif;
+  min-height: 100vh;
+}
+
+header nav {
+  position: relative;
+  right: 25px;
+}
+
+#page_logo {
+  color: rgb(151, 184, 245);
+  transition: all 0.3s ease;
+}
+
+#page_logo:hover {
+  color: rgb(120, 167, 255);
+  transform: scale(1.05);
+}
+
+header ul a {
+  color: rgb(151, 184, 245);
+  margin: 5px 15px;
+  transition: all 0.3s ease;
+}
+
+.header_link:hover {
+  background-color: rgb(151, 184, 245);
+  color: black;
+  transform: translateY(-2px);
+}
+
+section {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 40px;
+  background: linear-gradient(135deg, #fef9e7 0%, #fdfbf2 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  margin-bottom: 3rem;
+}
+
+section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  text-decoration: underline;
+  text-decoration-color: rgb(151, 184, 245);
+  text-underline-offset: 10px;
+  font-family: 'Raleway', sans-serif;
+  color: #2c3e50;
+  margin-bottom: 40px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+#vendors-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.service {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  animation: slideIn 0.5s ease-out backwards;
+}
+
+.service:nth-child(1) { animation-delay: 0.1s; }
+.service:nth-child(2) { animation-delay: 0.2s; }
+.service:nth-child(3) { animation-delay: 0.3s; }
+.service:nth-child(4) { animation-delay: 0.4s; }
+.service:nth-child(5) { animation-delay: 0.5s; }
+
+.service:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(151, 184, 245, 0.3);
+  border-color: rgb(151, 184, 245);
+}
+
+.service img {
+  max-width: 280px;
+  height: 180px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f8f9fa;
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+
+.service:hover img {
+  transform: scale(1.05);
+}
+
+.service-info {
+  margin-left: 30px;
+  flex: 1;
+}
+
+.service-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.service-description {
+  font-weight: 500;
+  line-height: 1.8;
+  color: #555;
+}
+
+.service-description strong {
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.service-description br {
+  display: block;
+  content: "";
+  margin-top: 8px;
+}
+
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, rgb(151, 184, 245), transparent);
+  margin: 12px 0;
+}
+
+section > a {
+  display: inline-block;
+  text-decoration: none;
+  color: white;
+  padding: 14px 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgb(151, 184, 245), rgb(120, 167, 255));
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(151, 184, 245, 0.4);
+  transition: all 0.3s ease;
+  margin: 20px auto;
+  display: block;
+  width: fit-content;
+  text-align: center;
+}
+
+section > a:hover {
+  background: linear-gradient(135deg, rgb(120, 167, 255), rgb(100, 150, 240));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(151, 184, 245, 0.6);
+}
+
+section > a:active {
+  transform: translateY(-1px);
+}
+
+.loading-message,
+.no-data,
+.error-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.error-message {
+  color: #e74c3c;
+}
+
+footer p {
+  font-family: 'Raleway', sans-serif;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  section {
+    padding: 25px;
+    margin: 20px;
+  }
+
+  section h2 {
+    font-size: 2rem;
+  }
+
+  .service {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .service img {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .service-info {
+    margin-left: 0;
+  }
+
+  section > a {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+}

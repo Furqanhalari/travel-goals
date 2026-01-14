@@ -1,0 +1,325 @@
+/* Contact/Booking Page Styles */
+body {
+  background: linear-gradient(135deg, rgb(62, 61, 61), rgb(43, 43, 43));
+  margin: 0;
+  padding: 0;
+  font-family: 'Quicksand', sans-serif;
+  min-height: 100vh;
+}
+
+header nav {
+  position: relative;
+  right: 25px;
+}
+
+#page_logo {
+  color: rgb(151, 184, 245);
+}
+
+header ul a {
+  color: rgb(151, 184, 245);
+  margin: 5px 15px;
+}
+
+.header_link:hover {
+  background-color: rgb(151, 184, 245);
+  color: black;
+}
+
+main {
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.success-message,
+.error-message {
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+}
+
+.success-message {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.error-message {
+  background-color: #f44336;
+  color: white;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-group {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 3rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+#form h3 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid rgb(151, 184, 245);
+  font-family: 'Raleway', sans-serif;
+}
+
+#form h3.text-white {
+  color: #2c3e50;
+}
+
+/* Input containers with proper spacing */
+#input,
+#input2,
+#input3,
+#input4,
+#input6 {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+#input {
+  grid-template-columns: 1fr;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #2c3e50;
+}
+
+.text-white {
+  color: #2c3e50 !important;
+}
+
+#input2 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+#input6 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+#input4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Input styling */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-family: 'Quicksand', sans-serif;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus {
+  outline: none;
+  border-color: rgb(151, 184, 245);
+  box-shadow: 0 0 0 3px rgba(151, 184, 245, 0.2);
+}
+
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Radio button section */
+#input3 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+#input3 span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+#input3 div {
+  display: flex;
+  gap: 2rem;
+}
+
+#input3 input[type="radio"] {
+  width: auto;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+#input3 label {
+  color: #2c3e50;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Textarea styling */
+section {
+  margin-bottom: 2.5rem;
+}
+
+section label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-family: 'Quicksand', sans-serif;
+  resize: vertical;
+  min-height: 120px;
+  transition: all 0.3s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: rgb(151, 184, 245);
+  box-shadow: 0 0 0 3px rgba(151, 184, 245, 0.2);
+}
+
+/* Personal details section spacing */
+#input5 {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+/* Button container */
+#btn-holder {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2.5rem;
+}
+
+button {
+  padding: 0.875rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Quicksand', sans-serif;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#clear-btn {
+  background: #6c757d;
+  color: white;
+}
+
+#clear-btn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#submit-btn {
+  background: linear-gradient(135deg, rgb(151, 184, 245), rgb(120, 167, 255));
+  color: white;
+}
+
+#submit-btn:hover {
+  background: linear-gradient(135deg, rgb(120, 167, 255), rgb(100, 150, 240));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(151, 184, 245, 0.4);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Footer styling */
+footer {
+  margin-top: 4rem;
+  padding: 2rem 0;
+}
+
+footer p {
+  font-family: 'Raleway', sans-serif;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .form-group {
+    padding: 2rem 1.5rem;
+  }
+
+  #input,
+  #input2,
+  #input6 {
+    grid-template-columns: 1fr;
+  }
+
+  #input4 {
+    grid-template-columns: 1fr;
+  }
+
+  #btn-holder {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+}

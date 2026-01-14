@@ -1,0 +1,809 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Goals - Booking{% endblock %}
+
+{% block extra_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/contact.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/payment.css') }}" />
+    <style>
+    .success-message {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      display: none;
+    }
+    .error-message {
+      background-color: #f44336;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .bookings-container {
+      max-width: 1200px;
+      margin: 60px auto 40px;
+      padding: 20px;
+    }
+    
+    .bookings-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    
+    .bookings-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.5em;
+    }
+    
+    .booking-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .booking-card h3 {
+      margin: 0 0 15px 0;
+      color: #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .booking-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .detail-item {
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .detail-item strong {
+      display: block;
+      color: #667eea;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+    
+    .detail-item span {
+      color: #333;
+      font-size: 1.1em;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-confirmed, .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .customer-info {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    
+    .customer-info h4 {
+      margin: 0 0 10px 0;
+      color: #2196F3;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      color: #999;
+    }
+    
+    .empty-state h2 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .action-btn {
+        padding: 8px 15px;
+        margin-right: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+    }
+
+    .btn-approve {
+        background-color: #28a745;
+        color: white;
+    }
+    .btn-approve:hover {
+        background-color: #218838;
+    }
+
+    .btn-reject {
+        background-color: #dc3545;
+        color: white;
+    }
+    .btn-reject:hover {
+        background-color: #c82333;
+    }
+    .btn-complete {
+        background-color: #004085;
+        color: white;
+    }
+    .btn-complete:hover {
+        background-color: #003366;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+    <div class="bookings-container" id="vendorBookings" style="display: none;">
+      <div class="bookings-header">
+        <h1>📋 My Bookings</h1>
+        <p>View and manage bookings for your packages</p>
+      </div>
+
+      <div id="bookingsList">
+        <div class="empty-state">Loading bookings...</div>
+      </div>
+    </div>
+
+    <!-- Admin Bookings View (Read-only, all bookings) -->
+    <div class="bookings-container" id="adminBookings" style="display: none;">
+      <div class="bookings-header">
+        <h1>📊 All Platform Bookings</h1>
+        <p>Monitor all bookings across the platform</p>
+      </div>
+
+      <div id="adminBookingsList">
+        <div class="empty-state">Loading bookings...</div>
+      </div>
+    </div>
+      
+    <div class="container">
+      <div id="successMessage" class="success-message"></div>
+      <div id="errorMessage" class="error-message"></div>
+      
+      <!-- Price Calculator Display -->
+      <div id="priceCalculator" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: none;">
+        <h3 style="color: #333; margin-top: 0;">Booking Summary</h3>
+        <div id="calculatorContent" style="color: #333;"></div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #ff8c00;">
+          <h2 style="color: #ff8c00; margin: 0;">Total: $<span id="totalPrice">0.00</span></h2>
+        </div>
+      </div>
+      
+      <form class="form-group" id="bookingForm">
+          <div id="form">
+              <h3 class="text-white">Flight & Package Information</h3>
+
+            <div id="input">
+              <label class="text-white">Travel Package</label>
+              <select name="package_id" id="packageSelect" style="background: rgb(159, 159, 159);" required>
+                  <option value="">Loading packages...</option>
+              </select>
+              
+              <label class="text-white">From Location</label>
+              <input type="text" name="from_location" placeholder="Enter departure city" required>
+              
+              <label class="text-white">To Location</label>
+              <input type="text" name="to_location" placeholder="Enter destination city" required>
+              
+              <label class="text-white">Departure Date</label>
+              <input type="date" name="departure_date" required>
+              
+              <label class="text-white">Departure Time</label>
+              <input type="time" name="departure_time" required>
+              
+              <label class="text-white">Preferred Airline</label>
+              <select name="preferred_airline" id="airlineSelect" style="background: rgb(159, 159, 159);" required>
+                  <option value="">Loading airlines...</option>
+              </select>
+              
+              <label class="text-white">Preferred Seating Class</label>
+              <select name="preferred_seating" style="background: rgb(159, 159, 159);" required>
+                  <option value="">Select seating class</option>
+                  <option value="Economy Class">Economy Class</option>
+                  <option value="Business Class">Business Class</option>
+              </select>
+              </div>
+
+              <h3 class="text-white" style="margin-top: 30px;">Passenger Details</h3>
+              <div id="input2">
+                  <div>
+                    <label class="text-white">Number of Adults (12+ years)</label>
+                    <input type="number" name="num_adults" placeholder="Number of adults" min="1" value="1" required>
+                  </div>
+                  <div>
+                    <label class="text-white">Number of Children (2-11 years)</label>
+                    <input type="number" name="num_children" placeholder="Number of children" min="0" value="0">
+                  </div>
+                  <div>
+                    <label class="text-white">Number of Infants (Under 2 years)</label>
+                    <input type="number" name="num_infants" placeholder="Number of infants" min="0" value="0">
+                  </div>
+              </div>
+
+              <h3 class="text-white" style="margin-top: 30px;">Trip Type & Return Details</h3>
+              <div id="input3">
+                  <span id="input-group" class="text-primary">Select Your Fare Type</span>
+                  <div>
+                    <input type="radio" id="oneWay" name="fare_type" value="one_way" required>
+                    <label class="text-white" for="oneWay">One Way</label>
+                    <input type="radio" id="roundTrip" name="fare_type" value="round_trip" required>
+                    <label class="text-white" for="roundTrip">Round Trip</label>
+                  </div> 
+              </div>
+
+              <div id="input4" style="display: none;">
+                  <div>
+                    <label class="text-white">Return Date (For Round Trip)</label>
+                    <input type="date" name="return_date" placeholder="Return Date">
+                  </div>
+                  <div>
+                    <label class="text-white">Return Time (For Round Trip)</label>
+                    <input type="time" name="return_time" placeholder="Return time">
+                  </div>
+              </div>
+              
+              <section style="margin-top: 20px;">
+                <label for="user-message" class="text-white">Special Requests / Additional Information</label>
+                <textarea
+                  id="user-message"
+                  name="message"
+                  rows="5"
+                  minlength="10"
+                  maxlength="1000"
+                  placeholder="Enter any special requests, dietary requirements, accessibility needs, etc."
+                ></textarea>
+              </section>
+
+              <div id="input5">
+                  <h3 class="text-white">Contact Information</h3>
+              </div>
+
+              <div id="input6">
+                  <div>
+                    <label class="text-white">Full Name</label>
+                    <input type="text" name="full_name" placeholder="Enter your full name as per ID" required>
+                  </div>
+                  <div>
+                    <label class="text-white">Phone Number</label>
+                    <input type="tel" name="phone" placeholder="Enter your contact number" required>
+                  </div>
+                  <div>
+                    <label class="text-white">Email Address</label>
+                    <input type="email" name="email" placeholder="Enter your email address" required>
+                  </div>
+              </div>
+              <section>
+                <div id="btn-holder">
+                  <button id="clear-btn" type="reset">Clear</button>
+                  <button type="submit" id="submit-btn">Submit</button>
+                </div>
+              </section>
+          </div>
+      </form>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+  <script>
+    // Store all packages and vendors data
+    let packagesData = [];
+    let vendorsData = [];
+    let selectedPackage = null;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        
+        // Check role and display appropriate view
+        if (user.role === 'vendor') {
+          // Show vendor bookings view, hide booking form
+          document.getElementById('vendorBookings').style.display = 'block';
+          document.querySelector('.container').style.display = 'none';
+          loadVendorBookings();
+        } else if (user.role === 'admin') {
+          // Show admin view (all bookings)
+          document.getElementById('adminBookings').style.display = 'block';
+          document.querySelector('.container').style.display = 'none';
+          // loadAllBookings(); // Not implemented yet
+          document.getElementById('adminBookingsList').innerHTML = '<div class="empty-state">Admin booking view is coming soon.</div>';
+        } else {
+          // Show booking form for customers
+          document.querySelector('.container').style.display = 'block';
+          document.getElementById('vendorBookings').style.display = 'none';
+          document.getElementById('adminBookings').style.display = 'none';
+        }
+      } else {
+        // Not logged in - redirect to login
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Load packages first
+      await loadPackages();
+      // Then load airlines (which will trigger handlePackageChange if needed)
+      await loadAirlines();
+      
+      // Add event listeners for price calculation
+      document.getElementById('packageSelect').addEventListener('change', handlePackageChange);
+      document.querySelector('select[name="preferred_seating"]').addEventListener('change', calculateTotalPrice);
+      document.querySelector('input[name="num_adults"]').addEventListener('input', calculateTotalPrice);
+      document.querySelector('input[name="num_children"]').addEventListener('input', calculateTotalPrice);
+      document.querySelector('input[name="num_infants"]').addEventListener('input', calculateTotalPrice);
+      document.querySelector('input[name="departure_date"]').addEventListener('change', calculateTotalPrice);
+      document.querySelector('input[name="departure_time"]').addEventListener('change', calculateTotalPrice);
+      document.querySelector('input[name="return_date"]').addEventListener('change', calculateTotalPrice);
+      document.querySelector('input[name="return_time"]').addEventListener('change', calculateTotalPrice);
+      
+      // Add event listeners for fare type radio buttons
+      document.querySelectorAll('input[name="fare_type"]').forEach(radio => {
+        radio.addEventListener('change', toggleReturnFields);
+      });
+    });
+
+    // Get package_id from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const preselectedPackageId = urlParams.get('package_id');
+
+    // Load packages from database
+    async function loadPackages() {
+      try {
+        const response = await fetch('/api/packages');
+        const result = await response.json();
+        
+        const packageSelect = document.getElementById('packageSelect');
+        packageSelect.innerHTML = '<option value="">Select a travel package</option>';
+        
+        if (result.success && result.packages) {
+          packagesData = result.packages;
+          result.packages.forEach(pkg => {
+            const option = document.createElement('option');
+            option.value = pkg.package_id;
+            option.textContent = `${pkg.package_name} - ${pkg.destination_name}`;
+            option.setAttribute('data-vendor', pkg.vendor_name);
+            option.setAttribute('data-destination', pkg.destination_name);
+            packageSelect.appendChild(option);
+          });
+          
+          // Pre-select package if package_id is in URL (but wait for vendors to load)
+          if (preselectedPackageId) {
+            packageSelect.value = preselectedPackageId;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading packages:', error);
+        const packageSelect = document.getElementById('packageSelect');
+        packageSelect.innerHTML = '<option value="">Error loading packages</option>';
+      }
+    }
+
+    // Load airlines from database
+    async function loadAirlines() {
+      try {
+        const response = await fetch('/api/vendors');
+        const result = await response.json();
+        
+        const airlineSelect = document.getElementById('airlineSelect');
+        airlineSelect.innerHTML = '<option value="">Select preferred airline</option>';
+        
+        if (result.success && result.vendors) {
+          vendorsData = result.vendors;
+          result.vendors.forEach(vendor => {
+            const option = document.createElement('option');
+            option.value = vendor.company_name;
+            option.textContent = vendor.company_name;
+            airlineSelect.appendChild(option);
+          });
+          
+          // NOW handle package change after vendors are loaded
+          if (preselectedPackageId) {
+            handlePackageChange();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading airlines:', error);
+        const airlineSelect = document.getElementById('airlineSelect');
+        airlineSelect.innerHTML = '<option value="">Error loading airlines</option>';
+      }
+    }
+
+    // Handle package selection change
+    function handlePackageChange() {
+      const packageSelect = document.getElementById('packageSelect');
+      const packageId = packageSelect.value;
+      
+      if (packageId) {
+        selectedPackage = packagesData.find(pkg => pkg.package_id == packageId);
+        
+        if (selectedPackage) {
+          console.log('Selected package:', selectedPackage);
+          
+          // Pre-fill airline if available
+          const airlineSelect = document.getElementById('airlineSelect');
+          
+          // Try to find and select the vendor/airline
+          if (selectedPackage.vendor_name) {
+            // Give a small delay to ensure options are rendered
+            setTimeout(() => {
+              const vendorOption = Array.from(airlineSelect.options).find(
+                opt => opt.value === selectedPackage.vendor_name
+              );
+              
+              if (vendorOption) {
+                airlineSelect.value = selectedPackage.vendor_name;
+                console.log('Airline pre-selected:', selectedPackage.vendor_name);
+              } else {
+                console.warn('Vendor not found in airline list:', selectedPackage.vendor_name);
+              }
+              
+              // Make fields uneditable if coming from packages page
+              if (preselectedPackageId) {
+                packageSelect.style.pointerEvents = 'none';
+                packageSelect.style.background = 'rgb(200, 200, 200)';
+                packageSelect.style.cursor = 'not-allowed';
+                
+                if (vendorOption) {
+                  airlineSelect.style.pointerEvents = 'none';
+                  airlineSelect.style.background = 'rgb(200, 200, 200)';
+                  airlineSelect.style.cursor = 'not-allowed';
+                }
+              }
+            }, 100);
+          }
+          
+          // Update price calculator
+          calculateTotalPrice();
+        }
+      } else {
+        selectedPackage = null;
+        document.getElementById('priceCalculator').style.display = 'none';
+      }
+    }
+
+    // Calculate total price based on selections
+    function calculateTotalPrice() {
+      if (!selectedPackage) {
+        document.getElementById('priceCalculator').style.display = 'none';
+        return;
+      }
+      
+      const seatingClass = document.querySelector('select[name="preferred_seating"]').value;
+      const numAdults = parseInt(document.querySelector('input[name="num_adults"]').value) || 0;
+      const numChildren = parseInt(document.querySelector('input[name="num_children"]').value) || 0;
+      const numInfants = parseInt(document.querySelector('input[name="num_infants"]').value) || 0;
+      const fareType = document.querySelector('input[name="fare_type"]:checked')?.value;
+      const departureDate = document.querySelector('input[name="departure_date"]').value;
+      const departureTime = document.querySelector('input[name="departure_time"]').value;
+      const returnDate = document.querySelector('input[name="return_date"]').value;
+      const returnTime = document.querySelector('input[name="return_time"]').value;
+      
+      // Show basic package info even if seating/fare not selected yet
+      if (!seatingClass || !fareType) {
+        const calculatorContent = document.getElementById('calculatorContent');
+        calculatorContent.innerHTML = `
+          <p><strong>Package:</strong> ${selectedPackage.package_name}</p>
+          <p><strong>Destination:</strong> ${selectedPackage.destination_name}</p>
+          <p><strong>Vendor:</strong> ${selectedPackage.vendor_name}</p>
+          ${departureDate ? `<p><strong>Departure:</strong> ${departureDate}${departureTime ? ' at ' + departureTime : ''}</p>` : ''}
+          <p style="color: #666; margin-top: 10px;">Please select seating class and trip type to see pricing</p>
+        `;
+        document.getElementById('totalPrice').textContent = '0.00';
+        document.getElementById('priceCalculator').style.display = 'block';
+        return;
+      }
+      
+      let adultPrice, childPrice, infantPrice;
+      
+      // Determine prices based on seating class
+      if (seatingClass === 'Economy Class') {
+        adultPrice = selectedPackage.economy_adult_price || selectedPackage.adult_price;
+        childPrice = selectedPackage.economy_child_price || selectedPackage.child_price;
+        infantPrice = selectedPackage.economy_infant_price || selectedPackage.infant_price;
+      } else if (seatingClass === 'Business Class') {
+        adultPrice = selectedPackage.business_adult_price || (selectedPackage.adult_price * 1.5);
+        childPrice = selectedPackage.business_child_price || (selectedPackage.child_price * 1.5);
+        infantPrice = selectedPackage.business_infant_price || (selectedPackage.infant_price * 1.5);
+      } else {
+        document.getElementById('priceCalculator').style.display = 'none';
+        return;
+      }
+      
+      // Calculate subtotal
+      let subtotal = (adultPrice * numAdults) + (childPrice * numChildren) + (infantPrice * numInfants);
+      
+      // Double for round trip
+      const multiplier = fareType === 'round_trip' ? 2 : 1;
+      const total = subtotal * multiplier;
+      
+      // Display calculation
+      const calculatorContent = document.getElementById('calculatorContent');
+      calculatorContent.innerHTML = `
+        <p><strong>Package:</strong> ${selectedPackage.package_name}</p>
+        <p><strong>Destination:</strong> ${selectedPackage.destination_name}</p>
+        <p><strong>Vendor:</strong> ${selectedPackage.vendor_name}</p>
+        <p><strong>Seating Class:</strong> ${seatingClass}</p>
+        <p><strong>Trip Type:</strong> ${fareType === 'round_trip' ? 'Round Trip' : 'One Way'}</p>
+        ${departureDate ? `<p><strong>Departure:</strong> ${departureDate}${departureTime ? ' at ' + departureTime : ''}</p>` : ''}
+        ${fareType === 'round_trip' && returnDate ? `<p><strong>Return:</strong> ${returnDate}${returnTime ? ' at ' + returnTime : ''}</p>` : ''}
+        <hr style="margin: 10px 0;">
+        ${numAdults > 0 ? `<p>Adults (${numAdults}): $${adultPrice.toFixed(2)} × ${numAdults} = $${(adultPrice * numAdults).toFixed(2)}</p>` : ''}
+        ${numChildren > 0 ? `<p>Children (${numChildren}): $${childPrice.toFixed(2)} × ${numChildren} = $${(childPrice * numChildren).toFixed(2)}</p>` : ''}
+        ${numInfants > 0 ? `<p>Infants (${numInfants}): $${infantPrice.toFixed(2)} × ${numInfants} = $${(infantPrice * numInfants).toFixed(2)}</p>` : ''}
+        ${fareType === 'round_trip' ? `<p><strong>Round Trip Multiplier:</strong> × 2</p>` : ''}
+      `;
+      
+      document.getElementById('totalPrice').textContent = total.toFixed(2);
+      document.getElementById('priceCalculator').style.display = 'block';
+      
+      return total;
+    }
+
+    // Show/hide return date fields based on fare type
+    function toggleReturnFields() {
+      const fareType = document.querySelector('input[name="fare_type"]:checked')?.value;
+      const returnFields = document.getElementById('input4');
+      
+      if (fareType === 'round_trip') {
+        returnFields.style.display = 'flex';
+        returnFields.querySelectorAll('input').forEach(input => {
+          input.required = true;
+        });
+      } else {
+        returnFields.style.display = 'none';
+        returnFields.querySelectorAll('input').forEach(input => {
+          input.required = false;
+          input.value = '';
+        });
+      }
+      
+      calculateTotalPrice();
+    }
+
+    // Form submission
+    document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const totalPrice = calculateTotalPrice();
+      
+      if (!totalPrice || totalPrice <= 0) {
+        showError('Please complete all required fields to calculate the total price');
+        return;
+      }
+      
+      const formData = new FormData(this);
+      const data = {};
+      
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+      
+      document.getElementById('packageSelect').disabled = false;
+      document.getElementById('airlineSelect').disabled = false;
+      
+      data.total_price = totalPrice;
+      
+      if (data.fare_type === 'round_trip' && (!data.return_date || !data.return_time)) {
+        showError('Please provide return date and time for round trip');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showSuccess(result.message);
+          this.reset();
+          document.getElementById('priceCalculator').style.display = 'none';
+          
+          // Trigger Payment Modal
+          const payment = new PaymentModal(
+            result.booking_id,
+            result.total_price,
+            result.package_name
+          );
+          payment.show();
+          
+          selectedPackage = null;
+          
+          // Reset uneditable states
+          const packageSelect = document.getElementById('packageSelect');
+          const airlineSelect = document.getElementById('airlineSelect');
+          packageSelect.style.pointerEvents = '';
+          packageSelect.style.background = '';
+          packageSelect.style.cursor = '';
+          airlineSelect.style.pointerEvents = '';
+          airlineSelect.style.background = '';
+          airlineSelect.style.cursor = '';
+        } else {
+          showError(result.message);
+        }
+      } catch (error) {
+        showError('Failed to submit booking. Please try again.');
+        console.error('Error:', error);
+      }
+    });
+
+    function showSuccess(message) {
+      const successDiv = document.getElementById('successMessage');
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.style.display = 'none';
+      successDiv.textContent = message;
+      successDiv.style.display = 'block';
+      window.scrollTo(0, 0);
+      setTimeout(() => {
+        successDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function showError(message) {
+      const successDiv = document.getElementById('successMessage');
+      const errorDiv = document.getElementById('errorMessage');
+      successDiv.style.display = 'none';
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      window.scrollTo(0, 0);
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+      
+    async function loadVendorBookings() {
+      const listDiv = document.getElementById('bookingsList');
+      
+      try {
+        const response = await fetch('/api/vendor/bookings', {
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.bookings && data.bookings.length > 0) {
+          listDiv.innerHTML = '';
+          
+          data.bookings.forEach(booking => {
+            const statusClass = `status-${booking.status}`;
+            
+            // Determine if actions should be shown (only for pending bookings)
+            const showActions = booking.status === 'pending';
+            
+            const card = document.createElement('div');
+            card.className = 'booking-card';
+            card.innerHTML = `
+              <h3>
+                <span>📦 ${booking.package_name || 'N/A'}</span>
+                <div>
+                    <span class="status-badge ${statusClass}">${booking.status.toUpperCase()}</span>
+                    <span class="status-badge ${booking.payment_status === 'Paid' ? 'status-confirmed' : 'status-pending'}" style="margin-left: 5px;">
+                        ${booking.payment_status || 'UNPAID'}
+                    </span>
+                </div>
+              </h3>
+              
+              <div class="booking-details">
+                <div class="detail-item">
+                    <strong>Customer</strong>
+                    <span>${booking.customer_full_name} (${booking.customer_email})</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Total Price</strong>
+                    <span>$${booking.total_price.toFixed(2)}</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Travel Date</strong>
+                    <span>${new Date(booking.departure_date).toLocaleDateString()}</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Travelers</strong>
+                    <span>${booking.num_travelers}</span>
+                </div>
+              </div>
+
+               ${showActions ? `
+                <div class="actions" style="margin-top: 20px; text-align: right;">
+                    <button class="action-btn btn-approve" onclick="updateBookingStatus(${booking.booking_id}, 'confirmed')">
+                        ✓ Confirm Booking
+                    </button>
+                    <button class="action-btn btn-reject" onclick="updateBookingStatus(${booking.booking_id}, 'cancelled')">
+                        ✗ Reject Booking
+                    </button>
+                </div>
+               ` : ''}
+
+               ${booking.status === 'confirmed' ? `
+                <div class="actions" style="margin-top: 20px; text-align: right;">
+                    <button class="action-btn btn-complete" onclick="updateBookingStatus(${booking.booking_id}, 'completed')">
+                        🏁 Mark as Completed
+                    </button>
+                </div>
+               ` : ''}
+            `;
+            listDiv.appendChild(card);
+          });
+        } else {
+            listDiv.innerHTML = '<div class="empty-state"><h2>No bookings yet</h2><p>When customers book your packages, they will appear here.</p></div>';
+        }
+      } catch (error) {
+        console.error('Error loading vendor bookings:', error);
+        listDiv.innerHTML = '<div class="error-message">Failed to load bookings.</div>';
+      }
+    }
+
+    async function updateBookingStatus(bookingId, newStatus) {
+        let reason = '';
+        if (newStatus === 'cancelled') {
+            reason = prompt("Please provide a reason for rejection (optional):");
+        }
+
+        if (!confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) return;
+
+        try {
+            const response = await fetch(`/api/vendor/bookings/${bookingId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus, message: reason })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`Booking ${newStatus} successfully!`);
+                loadVendorBookings();
+            } else {
+                alert('Failed to update status: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('An error occurred. Please try again.');
+        }
+    }
+  </script>
+{% endblock %}

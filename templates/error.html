@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Travel Goals{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 100px auto;
+        text-align: center;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .error-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        color: #e74c3c;
+    }
+    
+    .error-title {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .error-message {
+        color: #666;
+        font-size: 1.1em;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .home-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .home-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-icon">
+        {% if error_code == 404 %}
+            🗺️
+        {% elif error_code == 403 %}
+            🔒
+        {% elif error_code == 401 %}
+            🔑
+        {% else %}
+            ⚠️
+        {% endif %}
+    </div>
+    
+    <h1 class="error-title">
+        {% if title %}
+            {{ title }}
+        {% else %}
+            Something went wrong
+        {% endif %}
+    </h1>
+    
+    <p class="error-message">
+        {% if message %}
+            {{ message }}
+        {% else %}
+            We encountered an unexpected error. Please try again later.
+        {% endif %}
+    </p>
+    
+    <a href="{{ url_for('index') }}" class="home-btn">Return Home</a>
+</div>
+{% endblock %}

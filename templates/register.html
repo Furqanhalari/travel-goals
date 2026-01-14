@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Travel Goals{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+    .vendor-fields {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid #fff;
+    }
+    .vendor-fields.active {
+      display: block;
+    }
+    .role-selection {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .role-option {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .role-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    .role-option.selected {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .role-option input[type="radio"] {
+      display: none;
+    }
+    .role-icon {
+      font-size: 1.5em;
+      margin-bottom: 5px;
+    }
+    .role-option h3 {
+        margin: 5px 0;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+    .role-option p {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0;
+    }
+    .info-message {
+      padding: 10px;
+      background: rgba(33, 150, 243, 0.2);
+      border-left: 3px solid #2196F3;
+      margin: 15px 0;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    
+    /* Override for register page specifically if needed to be wider */
+    .login-card.register-card {
+        max-width: 500px;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-content">
+    <!-- Register Card -->
+    <div class="login-card register-card">
+      <h2>Create Your Account</h2>
+      
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+      
+      <form id="registerForm">
+        <div class="input-group">
+          <label>Select Account Type</label>
+          <div class="role-selection">
+            <label class="role-option selected">
+              <input type="radio" name="account_type" value="customer" checked />
+              <div class="role-icon">👤</div>
+              <h3>User</h3>
+              <p>Book travel packages</p>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="account_type" value="vendor" />
+              <div class="role-icon">🏢</div>
+              <h3>Vendor</h3>
+              <p>Offer travel services</p>
+            </label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="full_name">Full Name *</label>
+          <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
+        </div>
+
+        <div class="input-group">
+          <label for="username">Username *</label>
+          <input type="text" id="username" name="username" required placeholder="Choose a username">
+        </div>
+        
+        <div class="input-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+
+        <div class="input-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
+        </div>
+        
+        <div class="input-group">
+            <label for="password">Password *</label>
+            <input type="password" id="password" name="password" required placeholder="Create a password">
+        </div>
+
+        <div class="input-group">
+            <label for="confirm_password">Confirm Password *</label>
+            <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+        </div>
+
+        <div class="vendor-fields" id="vendorFields">
+          <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-bottom: 15px;">Vendor Information</h3>
+          <div class="info-message">
+            ⓘ Vendor accounts require admin approval before activation. You'll receive an email once approved.
+          </div>
+          
+          <div class="input-group">
+            <label for="company_name">Company Name *</label>
+            <input type="text" id="company_name" name="company_name" placeholder="Enter company name">
+          </div>
+
+          <div class="input-group">
+            <label for="business_license">Business License Number *</label>
+            <input type="text" id="business_license" name="business_license" placeholder="Enter license number">
+          </div>
+
+          <div class="input-group">
+            <label for="image_url">Company Logo URL</label>
+            <input type="url" id="image_url" name="image_url" placeholder="https://example.com/logo.png">
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-login" style="margin-top: 20px;">REGISTER</button>
+        
+        <div class="auth-switch">
+            Already have an account? <a href="{{ url_for('login_page') }}">Login</a>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Info Side -->
+    <div class="info-side">
+        <h1>JOIN THE<br>ADVENTURE<br>TODAY.</h1>
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.querySelectorAll('.role-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input[type="radio"]').checked = true;
+        
+        const vendorFields = document.getElementById('vendorFields');
+        const isVendor = this.querySelector('input[type="radio"]').value === 'vendor';
+        vendorFields.classList.toggle('active', isVendor);
+        
+        const vendorInputs = vendorFields.querySelectorAll('input');
+        vendorInputs.forEach(input => {
+          if (input.id !== 'image_url') { // image_url is optional
+            input.required = isVendor;
+          }
+        });
+      });
+    });
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+      
+      successDiv.style.display = 'none';
+      successDiv.textContent = '';
+      
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+      
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+      
+      successDiv.textContent = message;
+      successDiv.style.display = 'block';
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const full_name = document.getElementById('full_name').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm_password = document.getElementById('confirm_password').value;
+      const account_type = document.querySelector('input[name="account_type"]:checked').value;
+      
+      if (password !== confirm_password) {
+        showError('Passwords do not match!');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters!');
+        return;
+      }
+
+      const registrationData = {
+        full_name,
+        username,
+        email,
+        phone,
+        password,
+        account_type
+      };
+
+      if (account_type === 'vendor') {
+        registrationData.company_name = document.getElementById('company_name').value.trim();
+        registrationData.business_license = document.getElementById('business_license').value.trim();
+        registrationData.image_url = document.getElementById('image_url').value.trim();
+        
+        if (!registrationData.company_name || !registrationData.business_license) {
+          showError('Please fill in all vendor information!');
+          return;
+        }
+      }
+      
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(registrationData),
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showSuccess(data.message);
+          
+          document.getElementById('registerForm').reset();
+          document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+          document.querySelector('.role-option').classList.add('selected');
+          document.getElementById('vendorFields').classList.remove('active');
+          
+          if (account_type === 'vendor') {
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 3000);
+          } else {
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 2000);
+          }
+        } else {
+          showError(data.message || 'Registration failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showError('Network error. Please try again.');
+      }
+    });
+  </script>
+{% endblock %}
