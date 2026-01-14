@@ -69,6 +69,7 @@ Role-based access control (RBAC) for Admins, Vendors, and Customers, featuring h
 
 ## Screenshots
 ![image_alt][https://github.com/Furqanhalari/travel-goals/blob/main/Login%20Page.png?raw=true]
+![image_alt][https://github.com/Furqanhalari/travel-goals/blob/main/Homepage.png?raw=true]
 
 
 ## 📄 License
