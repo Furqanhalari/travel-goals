@@ -67,6 +67,10 @@ Role-based access control (RBAC) for Admins, Vendors, and Customers, featuring h
 
 ---
 
+<img width="1881" height="911" alt="image" src="https://github.com/user-attachments/assets/6fc694b4-46f3-45fb-937b-c1e6e5b4544e" />
+
+
+
 ## 📄 License
 Distributed under the MIT License. See `LICENSE` for more information.
 
